@@ -42,7 +42,6 @@ function Sidebar(props : SidebarProps) {
                                             ) : (
                                                 props.selectedValues[value]
                                             ) }
-
                                         </div>
                                     </div>
                                 </div>
@@ -51,6 +50,10 @@ function Sidebar(props : SidebarProps) {
 
                     })
                 }
+            </div>
+            <div className="Sidebar__Button">
+                <button><img src="/images/sidebar/prev.svg" alt="#"/></button>
+                <button className="_active">Далі <img src="/images/sidebar/next.svg" alt="#"/></button>
             </div>
         </div>
     )

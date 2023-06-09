@@ -2,6 +2,7 @@
   border-right: 2px solid $light-gray;
   height: 100%;
   padding: 30px;
+  position: relative;
   &__Item {
     margin-bottom: 24px;
     &__Wrapper {
@@ -24,5 +25,41 @@
       line-height: 130%;
       color: $dark-gray;
     }
+  }
+  &__Button {
+    position: absolute;
+    width: calc(100% - 60px);
+    bottom: 30px;
+    display: flex;
+    align-items: center;
+    button {
+      height: 52px;
+      width: 100%;
+      display: flex;
+      cursor: pointer;
+      font-size: 20px;
+      padding-top: 13px;
+      padding-bottom: 13px;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid $dark;
+      color: $dark;
+      background: none;
+      flex: 0 0 52px;
+      margin-right: 10px;
+      max-width: 52px;
+      &._active {
+        width: 100%;
+        max-width: 100%;
+        flex: auto;
+        margin-right: 0;
+        color: $light-gray;
+        background: $dark;
+        img {
+          margin-left: 10px;
+        }
+      }
+    }
+
   }
 }

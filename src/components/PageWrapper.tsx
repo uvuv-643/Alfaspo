@@ -1,5 +1,5 @@
 import React, {ReactNode, useState} from 'react'
-import Sidebar from "./giobal/Sidebar";
+import Sidebar from "./global/Sidebar";
 import { PAGES } from "../enums/Pages";
 import '../assets/styles/main.scss'
 import {SidebarSelectedValues} from "../assets/interfaces/SidebarSelectedValues";
