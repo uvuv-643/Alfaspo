@@ -1,26 +1,27 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {Route, BrowserRouter as Router, Routes} from "react-router-dom";
+import PageWrapper from "./components/PageWrapper";
+import Material from "./components/Material";
+
+import {PAGES} from "./enums/Pages";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+    const MaterialElement = (
+        <Material />
+    )
+
+    return (
+        <Router>
+            <div className="App">
+                <Routes>
+                    <Route path="/" element={<PageWrapper currentPage={PAGES.MATERIAL}>{ MaterialElement }</PageWrapper>} />
+                </Routes>
+            </div>
+        </Router>
+    )
+
 }
 
 export default App;

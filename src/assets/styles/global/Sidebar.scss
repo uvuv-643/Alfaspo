@@ -1,0 +1,28 @@
+.Sidebar {
+  border-right: 2px solid $light-gray;
+  height: 100%;
+  padding: 30px;
+  &__Item {
+    margin-bottom: 24px;
+    &__Wrapper {
+      display: flex;
+      align-items: center;
+    }
+    h4 {
+      color: $dark;
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 36px;
+    }
+    &__Image {
+      height: 20px;
+      margin-right: 5px;
+    }
+    &__Content {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 130%;
+      color: $dark-gray;
+    }
+  }
+}
