@@ -1,6 +1,6 @@
 import React from 'react'
 import { PAGES } from '../../enums/Pages'
-import {SidebarSelectedValues} from "../../assets/interfaces/SidebarSelectedValues";
+import {SidebarSelectedValues} from "../../interfaces/SidebarSelectedValues";
 
 interface SidebarProps {
     currentPage : PAGES,

@@ -18,3 +18,15 @@ h1, h2, h3, h4, h5, h6, p {
 .App {
   text-align: left;
 }
+.LargeCheckbox {
+  width: 52px;
+  height: 52px;
+  border: 2px solid $dark;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &._active {
+    background: $dark;
+  }
+}

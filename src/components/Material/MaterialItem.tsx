@@ -6,26 +6,25 @@ interface MaterialItemProps {
     image : ReactNode,
     title : string,
     description : string,
-    list : string[]
+    list : string[],
+    handleClick: () => void
 }
 
 function MaterialItem(props : MaterialItemProps) {
 
     return (
-        <div className={"MaterialItem " + (props.active ? '_active' : '') }>
+        <div onClick={props.handleClick} className={"MaterialItem " + (props.active ? '_active' : '') }>
             <div className="MaterialItem__Image">
-                { props.active && (
-                    <div className="MaterialItem__Image__Actual">
-                        { props.image }
-                    </div>
-                ) }
+                <div className="MaterialItem__Image__Actual">
+                    { props.image }
+                </div>
                 <div className="MaterialItem__Image__Title">
                     <h5>{ props.title }</h5>
                     <p>{ props.description }</p>
                 </div>
             </div>
             <div className="MaterialItem__Content">
-                <LargeCheckbox active={props.active} />
+                <LargeCheckbox active={props.active} className="MaterialItem__Checkbox" />
                 <div className="MaterialItem__List">
                     <ul>
                         { props.list.map((element : string) => (

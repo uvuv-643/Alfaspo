@@ -49,7 +49,7 @@ function Material() {
     return (
         <div className="Material">
             { materials.map(element => (
-                <MaterialItem {...element} active={element.id === activeMaterial} image={<img src={element.imagePath} alt={"#"} />} />
+                <MaterialItem handleClick={() => setActiveMaterial(element.id)} {...element} active={element.id === activeMaterial} image={<img src={element.imagePath} alt={"#"} />} />
             ))}
         </div>
     )

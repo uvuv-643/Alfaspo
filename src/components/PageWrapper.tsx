@@ -2,7 +2,7 @@ import React, {ReactNode, useState} from 'react'
 import Sidebar from "./global/Sidebar";
 import { PAGES } from "../enums/Pages";
 import '../assets/styles/main.scss'
-import {SidebarSelectedValues} from "../assets/interfaces/SidebarSelectedValues";
+import {SidebarSelectedValues} from "../interfaces/SidebarSelectedValues";
 
 interface PageWrapperProps {
     children : ReactNode,
