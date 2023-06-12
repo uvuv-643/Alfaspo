@@ -4,7 +4,9 @@ import {SidebarSelectedValues} from "../../interfaces/SidebarSelectedValues";
 
 interface SidebarProps {
     currentPage : PAGES,
-    selectedValues : SidebarSelectedValues
+    selectedValues : SidebarSelectedValues,
+    handleNext : () => void,
+    handleBack ?: () => void
 }
 
 function Sidebar(props : SidebarProps) {
@@ -52,8 +54,12 @@ function Sidebar(props : SidebarProps) {
                 }
             </div>
             <div className="Sidebar__Button">
-                <button><img src="/images/sidebar/prev.svg" alt="#"/></button>
-                <button className="_active">Далі <img src="/images/sidebar/next.svg" alt="#"/></button>
+                {
+                    props.currentPage !== PAGES.MATERIAL && (
+                        <button onClick={props.handleBack}><img src="/images/sidebar/prev.svg" alt="#"/></button>
+                    )
+                }
+                <button onClick={props.handleNext} className="_active">Далі <img src="/images/sidebar/next.svg" alt="#"/></button>
             </div>
         </div>
     )

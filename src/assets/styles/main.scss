@@ -4,6 +4,10 @@
 @import 'global/PageWrapper.scss';
 
 @import 'pages/Material.scss';
+@import 'pages/Dimensions.scss';
+@import 'pages/Margin.scss';
+@import 'pages/Color.scss';
+@import 'pages/Size.scss';
 
 html, body {
   margin: 0;
@@ -28,5 +32,27 @@ h1, h2, h3, h4, h5, h6, p {
   align-items: center;
   &._active {
     background: $dark;
+  }
+}
+
+.Checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #AAAAAA;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  &__Content {
+    width: 100%;
+    height: 100%;
+    background: $dark;
+    display: none;
+  }
+  &._active {
+    border-color: $dark;
+  }
+  &._active &__Content {
+    display: block;
   }
 }

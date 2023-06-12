@@ -1,12 +1,10 @@
 import React, {ReactNode} from 'react'
 import LargeCheckbox from "../global/LargeCheckbox";
+import MaterialElementInterface from "../../interfaces/MaterialElementInterface";
 
-interface MaterialItemProps {
+interface MaterialItemProps extends MaterialElementInterface {
     active : boolean,
     image : ReactNode,
-    title : string,
-    description : string,
-    list : string[],
     handleClick: () => void
 }
 

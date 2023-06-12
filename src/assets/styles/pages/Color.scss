@@ -1,0 +1,157 @@
+.Color {
+  &Main__Wrapper, &Second__Wrapper {
+    width: 100%;
+  }
+  &Main__Wrapper {
+    border-bottom: 2px solid $light-gray;
+    display: flex;
+    flex-direction: row;
+  }
+  &Second__Wrapper {
+    border-bottom: 2px solid $light-gray;
+    display: flex;
+    flex-direction: row;
+  }
+  &__Title {
+    width: 225px;
+    flex: 0 0 225px;
+    h3 {
+      margin-left: 30px;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 22px;
+      line-height: 120%;
+      color: $dark;
+      width: 106px;
+      margin-top: 30px;
+    }
+  }
+  &__Content {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 100%;
+  }
+}
+
+.ColorItem {
+  position: relative;
+  min-height: 100px;
+  width: 50%;
+  font-weight: 500;
+  font-size: 14px;
+  flex: 0 0 50%;
+  cursor: pointer;
+  &:not(._dark) {
+    color: #AAAAAA;
+    .Checkbox {
+      border-color: #AAAAAA;
+      &__Content {
+        background: #AAAAAA;
+      }
+    }
+  }
+  &._light {
+    color: $light-gray;
+    .Checkbox {
+      border-color: $light-gray;
+      &__Content {
+        background: $light-gray;
+      }
+    }
+  }
+  &__Background {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: right;
+    }
+    span {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+  &__Content {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    .Checkbox {
+      margin-right: 15px;
+    }
+  }
+}
+
+.Color.material-1 {
+  .ColorSecond__Wrapper {
+    .ColorItem {
+      width: 33.333%;
+      flex: 0 0 33.333%;
+      height: 198px;
+    }
+  }
+}
+
+.Color.material-2 {
+  .ColorMain__Wrapper {
+    .ColorItem {
+      &:first-child {
+        width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+  }
+  .ColorSecond__Wrapper {
+    .ColorItem {
+      height: 198px;
+    }
+  }
+}
+
+.Color.material-3 {
+  .ColorMain__Wrapper {
+    .ColorItem {
+      height: 150px;
+      &:first-child {
+        width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+  }
+  .ColorSecond__Wrapper {
+    .ColorItem {
+      width: 100%;
+      flex: 0 0 100%;
+      height: 146px;
+    }
+  }
+}
+
+.Color.material-3.height-24 {
+  .ColorMain__Wrapper {
+    .ColorItem {
+      height: 90px;
+      min-height: 90px;
+      &:first-child {
+        width: 50%;
+        flex: 0 0 50%;
+      }
+    }
+  }
+  .ColorSecond__Wrapper {
+    .ColorItem {
+      width: 100%;
+      flex: 0 0 100%;
+      height: 146px;
+    }
+  }
+}

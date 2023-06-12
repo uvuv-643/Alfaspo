@@ -1,5 +1,6 @@
 import React, {ReactNode, useState} from 'react'
 import MaterialItem from "./Material/MaterialItem";
+import MaterialElementInterface from "../interfaces/MaterialElementInterface";
 
 const materials = [
     {
@@ -42,14 +43,17 @@ const materials = [
     },
 ]
 
-function Material() {
+interface MaterialProps {
+    selectedMaterial : MaterialElementInterface | null,
+    handleSelectMaterial : (selectedMaterial : MaterialElementInterface) => void
+}
 
-    const [activeMaterial, setActiveMaterial] = useState(1)
+function Material(props : MaterialProps) {
 
     return (
         <div className="Material">
-            { materials.map(element => (
-                <MaterialItem handleClick={() => setActiveMaterial(element.id)} {...element} active={element.id === activeMaterial} image={<img src={element.imagePath} alt={"#"} />} />
+            { materials.map((element : MaterialElementInterface) => (
+                <MaterialItem handleClick={() => props.handleSelectMaterial(element)} {...element} active={element.id === props.selectedMaterial?.id} image={<img src={element.imagePath} alt={"#"} />} />
             ))}
         </div>
     )

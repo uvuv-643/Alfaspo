@@ -1,0 +1,105 @@
+.Margin {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 100%;
+  .MarginItem:first-child:nth-last-child(2),
+  .MarginItem:first-child:nth-last-child(2) ~ .MarginItem {
+    height: 50%;
+    width: 100%;
+    flex: 0 0 100%;
+  }
+  .MarginItem:first-child:nth-last-child(3),
+  .MarginItem:first-child:nth-last-child(3) ~ .MarginItem {
+    height: 33.33%;
+    width: 100%;
+    flex: 0 0 100%;
+  }
+  .MarginItem:first-child:nth-last-child(4),
+  .MarginItem:first-child:nth-last-child(4) ~ .MarginItem {
+    height: 50%;
+    width: 50%;
+    flex: 0 0 50%;
+    .MarginItem__Wrapper {
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .MarginItem__Image {
+      order: 1
+    }
+    .MarginItem__Content {
+      margin-right: 0;
+    }
+  }
+  .MarginItem:first-child:nth-last-child(5),
+  .MarginItem:first-child:nth-last-child(5) ~ .MarginItem:nth-child(1),
+  .MarginItem:first-child:nth-last-child(5) ~ .MarginItem:nth-child(2),
+  .MarginItem:first-child:nth-last-child(5) ~ .MarginItem:nth-child(3) {
+    height: 50%;
+    width: 33.33%;
+    flex: 0 0 33.33%;
+    .MarginItem__Wrapper {
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .MarginItem__Image {
+      order: 1
+    }
+    .MarginItem__Content {
+      margin-right: 0;
+    }
+  }
+  .MarginItem:first-child:nth-last-child(5) ~ .MarginItem:nth-child(4),
+  .MarginItem:first-child:nth-last-child(5) ~ .MarginItem:nth-child(5) {
+    height: 50%;
+    width: 50%;
+    flex: 0 0 50%;
+    .MarginItem__Wrapper {
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .MarginItem__Image {
+      order: 1
+    }
+    .MarginItem__Content {
+      margin-right: 0;
+    }
+  }
+}
+
+.MarginItem {
+  border: 1px solid $light-gray;
+  cursor: pointer;
+  &__Wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  &__Image {
+    order: 2
+  }
+  &__Content {
+    order: 1;
+    margin-right: 20px;
+    text-align: center;
+    & > div:first-child {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 22px;
+      line-height: 120%;
+    }
+    & > div:last-child {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}

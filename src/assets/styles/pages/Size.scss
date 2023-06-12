@@ -1,0 +1,226 @@
+.Size {
+  &__Mode {
+    display: flex;
+    height: 212px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-bottom: 2px solid $light-gray;
+    & > div {
+      width: 50%;
+      cursor: pointer;
+      flex: 0 0 50%;
+      position: relative;
+      border-left: 2px solid $light-gray;
+      &:first-child {
+        border-left: 0;
+      }
+      h5 {
+        color: $dark;
+        width: 157px;
+        font-weight: 600;
+        font-size: 22px;
+        line-height: 120%;
+      }
+      &._active {
+        h5 {
+          color: #757575;
+        }
+      }
+      .LargeCheckbox {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+      }
+    }
+    h5 {
+      margin-left: 30px;
+      margin-top: 30px;
+    }
+  }
+  &__Items {
+    &__Wrapper {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    width: 100%;
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 160px;
+  }
+  &__Length {
+    width: 50%;
+    flex: 0 0 50%;
+    height: 227px;
+    border-top: 2px solid $light-gray;
+    &__Wrapper {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    &__Item {
+      width: 180px;
+      display: flex;
+      align-items: center;
+      height: 30px;
+      border: 2px solid #AAA;
+      color: #AAA;
+      padding-left: 10px;
+      cursor: pointer;
+      margin-bottom: 5px;
+      &:hover {
+        border-color: $dark;
+        div:first-child {
+          color: $dark;
+        }
+      }
+      & > div {
+        font-weight: 500;
+        font-size: 14px;
+        &:first-child {
+          width: 57px;
+        }
+        &:last-child {
+          width: 24px;
+          text-align: right;
+        }
+      }
+      input {
+        width: 74px;
+        font-size: 12px;
+        border: none;
+        outline: none;
+        border-bottom: 1px solid #AAAAAA;
+      }
+    }
+    &._large &__Wrapper {
+      margin-top: 0;
+    }
+    &._large &__Item {
+      width: 126px;
+      margin-right: 5px;
+      & > div:first-child {
+        width: 23px;
+      }
+      & > div:last-child {
+        width: 24px;
+        text-align: right;
+      }
+      input {
+        width: 60px;
+      }
+    }
+
+  }
+  &__Placement {
+    width: 50%;
+    flex: 0 0 50%;
+    height: 227px;
+    border-top: 2px solid $light-gray;
+    border-left: 2px solid $light-gray;
+    &__Wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      margin-top: 32px;
+    }
+    &__Item {
+      display: flex;
+      cursor: pointer;
+      margin-top: 20px;
+      .Checkbox {
+        margin-right: 10px;
+
+      }
+    }
+  }
+  &__Length, &__Placement {
+    padding-left: 30px;
+    padding-top: 30px;
+    h5 {
+      font-weight: 600;
+      width: 100px;
+      margin-bottom: 13px;
+      font-size: 22px;
+      line-height: 120%;
+      color: $dark;
+    }
+  }
+  &__Hints {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.SizeItem {
+  width: 50%;
+  flex: 0 0 50%;
+  margin-top: 30px;
+  cursor: pointer;
+  &__Image {
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  &__Content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+  }
+}
+.SizeHint {
+  height: 194px;
+  width: 33.33%;
+  flex: 0 0 33.33%;
+  padding-top: 35px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  border: 1px solid $light-gray;
+  &:nth-child(1), &:nth-child(2), &:nth-child(3) {
+    border-top: 0;
+  }
+  &:nth-child(1), &:nth-child(4) {
+    border-left: 0;
+  }
+  &__Image {
+    height: 50px;
+    display: flex;
+    align-items: center;
+  }
+  &__Content {
+    margin-top: 10px;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 120%;
+    color: #757575;
+    width: 180px;
+    padding-left: 30px;
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+  }
+  &--Button {
+    border: 2px solid $dark;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 130%;
+    color: $dark;
+    text-align: center;
+    padding-top: 0;
+    cursor: pointer;
+    img {
+      margin-top: 10px;
+    }
+  }
+}
