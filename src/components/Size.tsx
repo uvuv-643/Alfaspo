@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import LargeCheckbox from "./global/LargeCheckbox";
 import Checkbox from "./global/Checkbox";
 
@@ -8,10 +8,29 @@ interface SizeProps {
     selectedSize : number,
     handleSelectSize : (size : number) => void,
     selectedPlacement : number,
-    handleSelectedPlacement : (placement : number) => void
+    handleSelectedPlacement : (placement : number) => void,
+    handleGoToDraw : () => void,
+    selectedSides ?: number[]
+}
+
+const enum SQUARE_SIDES {
+    AB,
+    BC
+}
+
+const enum POLYGON_SIDES {
+    AB,
+    BC,
+    CD,
+    DE,
+    EF,
+    FA,
 }
 
 function Size(props : SizeProps) {
+
+    const [focusedSideSquare, setFocusedSideSquare] = useState<SQUARE_SIDES | null>(null)
+    const [focusedSidePolygon, setFocusedSidePolygon] = useState<POLYGON_SIDES | null>(null)
 
     return (
         <div className="Size">
@@ -32,7 +51,11 @@ function Size(props : SizeProps) {
                             <div className="SizeItem" onClick={() => props.handleSelectSize(1) }>
                                 <div className="SizeItem__Image">
                                     { props.selectedSize === 1 ? (
-                                        <img src="/images/size/a-active.svg" alt="#"/>
+                                        <>
+                                            { focusedSideSquare === SQUARE_SIDES.AB && <img src="/images/size/a-activeAB.svg" alt="#"/> }
+                                            { focusedSideSquare === SQUARE_SIDES.BC && <img src="/images/size/a-activeBC.svg" alt="#"/> }
+                                            { focusedSideSquare === null && <img src="/images/size/a-active.svg" alt="#"/> }
+                                        </>
                                     ) : (
                                         <img src="/images/size/a.svg" alt="#"/>
                                     )}
@@ -44,7 +67,15 @@ function Size(props : SizeProps) {
                             <div className="SizeItem" onClick={() => props.handleSelectSize(2) }>
                                 <div className="SizeItem__Image">
                                     { props.selectedSize === 2 ? (
-                                        <img src="/images/size/b-active.svg" alt="#"/>
+                                        <>
+                                            { focusedSidePolygon === POLYGON_SIDES.AB && <img src="/images/size/b-activeAB.svg" alt="#"/> }
+                                            { focusedSidePolygon === POLYGON_SIDES.BC && <img src="/images/size/b-activeBC.svg" alt="#"/> }
+                                            { focusedSidePolygon === POLYGON_SIDES.CD && <img src="/images/size/b-activeCD.svg" alt="#"/> }
+                                            { focusedSidePolygon === POLYGON_SIDES.DE && <img src="/images/size/b-activeDE.svg" alt="#"/> }
+                                            { focusedSidePolygon === POLYGON_SIDES.EF && <img src="/images/size/b-activeEF.svg" alt="#"/> }
+                                            { focusedSidePolygon === POLYGON_SIDES.FA && <img src="/images/size/b-activeAF.svg" alt="#"/> }
+                                            { focusedSidePolygon === null && <img src="/images/size/b-active.svg" alt="#"/> }
+                                        </>
                                     ) : (
                                         <img src="/images/size/b.svg" alt="#"/>
                                     )}
@@ -58,47 +89,47 @@ function Size(props : SizeProps) {
                             <h5>Довжина Стін</h5>
                             { props.selectedSize === 1 ? (
                                 <div className="Size__Length__Wrapper">
-                                    <label htmlFor="length1" className="Size__Length__Item">
+                                    <label htmlFor="length1" className={ "Size__Length__Item " + (focusedSideSquare === SQUARE_SIDES.AB ? '_active' : '') }>
                                         <div>AB i CD</div>
-                                        <input id="length1" type="text" />
+                                        <input id="length1" type="text" onFocus={() => { setFocusedSideSquare(SQUARE_SIDES.AB) }} onBlur={ () => { setFocusedSideSquare(null) } }/>
                                         <div>мм</div>
                                     </label>
-                                    <label htmlFor="length2" className="Size__Length__Item">
+                                    <label htmlFor="length2" className={ "Size__Length__Item " + (focusedSideSquare === SQUARE_SIDES.BC ? '_active' : '') }>
                                         <div>BC i DA</div>
-                                        <input id="length2" type="text" />
+                                        <input id="length2" type="text" onFocus={() => { setFocusedSideSquare(SQUARE_SIDES.BC) }} onBlur={ () => { setFocusedSideSquare(null) } } />
                                         <div>мм</div>
                                     </label>
                                 </div>
                             ) : (
                                 <div className="Size__Length__Wrapper">
-                                    <label htmlFor="length3" className="Size__Length__Item">
+                                    <label htmlFor="length3" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.AB ? '_active' : '') }>
                                         <div>AB</div>
-                                        <input id="length3" type="text" />
+                                        <input id="length3" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.AB) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
-                                    <label htmlFor="length4" className="Size__Length__Item">
+                                    <label htmlFor="length4" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.BC ? '_active' : '') } >
                                         <div>DE</div>
-                                        <input id="length4" type="text" />
+                                        <input id="length4" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.BC) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
-                                    <label htmlFor="length5" className="Size__Length__Item">
+                                    <label htmlFor="length5" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.CD ? '_active' : '') }>
                                         <div>BC</div>
-                                        <input id="length5" type="text" />
+                                        <input id="length5" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.CD) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
-                                    <label htmlFor="length6" className="Size__Length__Item">
+                                    <label htmlFor="length6" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.DE ? '_active' : '') }>
                                         <div>EF</div>
-                                        <input id="length6" type="text" />
+                                        <input id="length6" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.DE) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
-                                    <label htmlFor="length7" className="Size__Length__Item">
+                                    <label htmlFor="length7" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.EF ? '_active' : '') }>
                                         <div>CD</div>
-                                        <input id="length7" type="text" />
+                                        <input id="length7" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.EF) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
-                                    <label htmlFor="length8" className="Size__Length__Item">
+                                    <label htmlFor="length8" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.FA ? '_active' : '') }>
                                         <div>FA</div>
-                                        <input id="length8" type="text" />
+                                        <input id="length8" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.FA) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                 </div>
@@ -156,7 +187,7 @@ function Size(props : SizeProps) {
                             </div>
                             <div className="SizeHint__Content">Щоб кут був кратен 45° потрібно зажати клавішу Shift поки ведите контур.</div>
                         </div>
-                        <div className="SizeHint SizeHint--Button">
+                        <div className="SizeHint SizeHint--Button" onClick={props.handleGoToDraw}>
                             <div>Накреслити Самостійно</div>
                             <img src="/images/size/next.svg" alt="#"/>
                         </div>

@@ -5,5 +5,6 @@ export enum PAGES {
     COLORS = 'Кольори',
     SIZE = 'Розмір Кімнати',
     PRICE = 'Ціна',
-    FORM = 'Відправка Запиту'
+    FORM = 'Відправка Запиту',
+    DRAW = ''
 }

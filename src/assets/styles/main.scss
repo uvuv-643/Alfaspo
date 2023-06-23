@@ -8,6 +8,7 @@
 @import 'pages/Margin.scss';
 @import 'pages/Color.scss';
 @import 'pages/Size.scss';
+@import 'pages/Draw.scss';
 
 html, body {
   margin: 0;
@@ -39,13 +40,13 @@ h1, h2, h3, h4, h5, h6, p {
   width: 20px;
   height: 20px;
   border: 2px solid #AAAAAA;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2px;
+  position: relative;
   &__Content {
-    width: 100%;
-    height: 100%;
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
     background: $dark;
     display: none;
   }

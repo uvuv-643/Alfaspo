@@ -15,6 +15,7 @@ import {MarginElementInterface} from "./interfaces/MarginElementInterface";
 import Color from "./components/Color";
 import {ColorElementInterface} from "./interfaces/ColorElementInterface";
 import Size from "./components/Size";
+import Draw from "./components/Draw";
 
 function App() {
 
@@ -76,12 +77,25 @@ function App() {
             handleSelectedPlacement={setSelectedSizePlacement}
             handleSelectMode={setSelectedSizeMode}
             handleSelectSize={setSelectedSize}
+            handleGoToDraw={() => {
+                setSendRedirectTo('/draw')
+            }}
         />
     )
 
-    useEffect(() => {
-        console.log(window.location)
-    }, [window.location.pathname])
+    const DrawElement = (
+        <Draw selectedValues={selectedValues}
+               availableRedirect={availableRedirect}
+               handleNext={() => {
+                   setSendRedirectTo('/price')
+               }}
+               handleBack={() => {
+                   setSendRedirectTo('/size')
+               }}
+               sendRedirectTo={sendRedirectTo}
+               currentPage={PAGES.DRAW}
+        />
+    )
 
     useEffect(() => {
         localStorage.setItem('selectedValues', JSON.stringify(selectedValues))
@@ -221,6 +235,11 @@ function App() {
                         sendRedirectTo={sendRedirectTo}
                         currentPage={PAGES.SIZE}
                     >{SizeElement}</PageWrapper>}/>
+
+                    <Route path="/draw"
+                           element={DrawElement}
+                    />
+
 
                 </Routes>
             </div>

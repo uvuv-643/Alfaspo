@@ -57,11 +57,10 @@ function Dimensions(props: DimensionsProps) {
                 value: 40
             }])
         }
-    }, [props.selectedMaterial])
+    }, [props.selectedMaterial, props.selectedWidth])
 
     useEffect(() => {
-        console.log('m', props)
-        if (props.selectedMaterial?.id === 1 && [1, 2].includes(props.selectedWidth?.id || -1)) return
+                if (props.selectedMaterial?.id === 1 && [1, 2].includes(props.selectedWidth?.id || -1)) return
         if (props.selectedMaterial?.id === 2 && [3, 4, 5].includes(props.selectedWidth?.id || -1)) return
         if (props.selectedMaterial?.id === 3 && [6].includes(props.selectedWidth?.id || -1)) return
         if (widthItem.length) {
@@ -70,8 +69,7 @@ function Dimensions(props: DimensionsProps) {
     }, [widthItem])
 
     useEffect(() => {
-        console.log('h', props.selectedWidth, props.selectedHeight)
-        if (props.selectedWidth?.id === 1 && [1, 2, 3, 4, 5, 6, 7, 8].includes(props.selectedHeight?.id || -1)) return;
+                if (props.selectedWidth?.id === 1 && [1, 2, 3, 4, 5, 6, 7, 8].includes(props.selectedHeight?.id || -1)) return;
         if (props.selectedWidth?.id === 2 && [9, 10, 11, 12, 13].includes(props.selectedHeight?.id || -1)) return;
         if (props.selectedWidth?.id === 3 && [14, 15, 16, 17].includes(props.selectedHeight?.id || -1)) return;
         if (props.selectedWidth?.id === 4 && [18, 19, 20].includes(props.selectedHeight?.id || -1)) return;
@@ -252,7 +250,7 @@ function Dimensions(props: DimensionsProps) {
                 value: 105
             }])
         }
-    }, [props.selectedWidth])
+    }, [props.selectedWidth, props.selectedHeight])
 
     return (
         <div className="Dimensions">
