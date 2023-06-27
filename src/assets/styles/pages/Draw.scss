@@ -12,6 +12,14 @@
   }
   position: relative;
   &Area {
+    &__Coverage {
+      position: absolute;
+      z-index: 4;
+      polygon:hover {
+        fill: $dark;
+        cursor: pointer;
+      }
+    }
     &__Lines {
       &--X, &--Y {
         div {
@@ -325,6 +333,7 @@
 
     }
   }
+
 }
 
 

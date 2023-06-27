@@ -1,8 +1,8 @@
 import React, {ReactNode, useEffect, useRef, useState} from 'react'
 import '../assets/styles/main.scss'
 import {
-    findClosestSegment,
-    getLengthWindow,
+    findClosestSegment, findNearestCellPoint,
+    getLengthWindow, getPanelLocation,
     isValidPolygon,
     RealPointInterface, realPointToWindow,
     WindowPointInterface, windowPointToReal
@@ -11,7 +11,9 @@ import Sidebar from "./global/Sidebar";
 import {PAGES} from "../enums/Pages";
 import {SidebarSelectedValues} from "../interfaces/SidebarSelectedValues";
 import {useNavigate} from "react-router-dom";
-import DrawArea from "./Draw/DrawArea";
+import DrawArea, {CELL_SIZE} from "./Draw/DrawArea";
+import {DimensionsElementInterface} from "../interfaces/DimensionsElementInterface";
+import {MarginElementInterface} from "../interfaces/MarginElementInterface";
 
 interface DrawProps {
     currentPage : PAGES,
@@ -20,6 +22,9 @@ interface DrawProps {
     handleNext : () => void,
     handleBack ?: () => void,
     selectedValues : SidebarSelectedValues,
+    width : DimensionsElementInterface | null,
+    height : DimensionsElementInterface | null,
+    margin : MarginElementInterface | null
 }
 
 function Draw(props : DrawProps) {
@@ -44,6 +49,7 @@ function Draw(props : DrawProps) {
 
     const [angleMode, setAngleMode] = useState<boolean>(false)
     const [moveMode, setMoveMode] = useState<boolean>(false)
+    const [coverage, setCoverage] = useState<string>('')
 
     const isUpdatingScroll = useRef(false)
     const navigate = useNavigate()
@@ -57,7 +63,6 @@ function Draw(props : DrawProps) {
         }
         return Math.abs(square / 2);
     }
-
     function mouseMoveHandler(event : React.MouseEvent) {
         if (rect) {
             setCursorPosition({
@@ -82,17 +87,14 @@ function Draw(props : DrawProps) {
 
     function handleClickOnArea(event : React.MouseEvent) {
         if (cursorPosition && !inactiveLine && !finishedBuilding) {
-            let currentPoint = {
+            let currentPoint = findNearestCellPoint({
                 x : cursorPosition.x,
                 y : cursorPosition.y
-            }
+            }, CELL_SIZE)
             if (usedShift) {
                 currentPoint = findClosestSegment(
                     realPointToWindow(points[points.length - 1], P, 0),
-                    {
-                        x : cursorPosition.x,
-                        y : cursorPosition.y
-                    }
+                    currentPoint
                 ).second
             }
             if (points.length >= 3 && getLengthWindow( { first: currentPoint, second: realPointToWindow(points[0], P, 0) } ) < 30) {
@@ -198,6 +200,10 @@ function Draw(props : DrawProps) {
         setIsNeedToMakeAgain(!isNeedToMakeAgain)
     }
 
+    const handleAngleDone = () => {
+        setAngleMode(false)
+    }
+
     const handleUpdatePoint = (index : number, newPosition : RealPointInterface) => {
         let oldPoints = [...points]
         if (index === 0 || index === points.length - 1) {
@@ -268,6 +274,14 @@ function Draw(props : DrawProps) {
         }
     }, [props.sendRedirectTo])
 
+    useEffect(() => {
+        if (!angleMode && !moveMode && finishedBuilding && actualAngle !== undefined) {
+            if (props.width && props.height && props.margin) {
+                setCoverage(getPanelLocation(points, props.width.value, props.height.value, props.margin.value, actualAngle, P))
+            }
+        }
+    }, [angleMode, moveMode, finishedBuilding, actualAngle, P])
+
     if (moveMode) {
         return (
             <div className="Draw" onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
@@ -332,7 +346,7 @@ function Draw(props : DrawProps) {
                         </div>
                         <div className="Draw__Hints--Angle__Controls">
                             <div className="Draw__Hints--Angle__Again" onClick={handleAngleReset}>Заново</div>
-                            <div className={"Draw__Hints--Angle__Next " + (isFinishedAngleChoose ? '_active' : '')}>
+                            <div className={"Draw__Hints--Angle__Next " + (isFinishedAngleChoose ? '_active' : '')} onClick={handleAngleDone}>
                                 Додати
                                 {
                                     !isFinishedAngleChoose ?
@@ -373,6 +387,7 @@ function Draw(props : DrawProps) {
                         finished={finishedBuilding}
                         setSelectedPoint={setSelectedPoint}
                         selectedPoint={selectedPoint}
+                        coverage={coverage}
                     />
                 </div>
                 <div className="Draw__Manage">

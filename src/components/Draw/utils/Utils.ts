@@ -1,4 +1,6 @@
 import {CELL_SIZE, FULL_HEIGHT, FULL_WIDTH} from "../DrawArea";
+import margin from "../../Margin";
+import {PointArray, SVG} from '@svgdotjs/svg.js';
 
 export interface PointInterface {
     x: number,
@@ -162,5 +164,156 @@ export function calculateDistance(point: PointInterface, lines: WindowLineInterf
         closestDistance = Math.min(closestDistance, distance);
     }
     return closestDistance;
+
+}
+
+export function findNearestCellPoint(point : WindowPointInterface, cellSize : number) {
+    return {
+        x: Math.round(point.x / cellSize) * cellSize,
+        y: Math.round(point.y / cellSize) * cellSize
+    }
+}
+
+function isPointInsidePolygonReal(point: RealPointInterface, polygon: RealPointInterface[]): boolean {
+    let isInside = false;
+    const numVertices = polygon.length;
+    let j = numVertices - 1;
+    for (let i = 0; i < numVertices; i++) {
+        const vertexA = polygon[i]
+        const vertexB = polygon[j]
+        if (
+            (vertexA.y < point.y && vertexB.y >= point.y) ||
+            (vertexB.y < point.y && vertexA.y >= point.y)
+        ) {
+            if (
+                vertexA.x +
+                ((point.y - vertexA.y) / (vertexB.y - vertexA.y)) *
+                (vertexB.x - vertexA.x) <
+                point.x
+            ) {
+                isInside = !isInside;
+            }
+        }
+        j = i;
+    }
+    return isInside;
+}
+
+export function rotatePointByAngle(point : PointInterface, angle : number) {
+    return {
+        x: point.x * Math.cos(angle) - point.y * Math.sin(angle),
+        y: point.y * Math.cos(angle) + point.x * Math.sin(angle)
+    }
+}
+
+export function getPanelLocation(points: RealPointInterface[], width: number, height: number, margin : number, angle: number, P : number) {
+
+    const X_STEP = 1
+    const Y_STEP = 1
+
+
+    console.log('initial point to window points', points.map((point) => {
+        return realPointToWindow(point, P, -112)
+    }))
+
+    // поворачиваем фигуру так, чтобы панели лежали вдоль OX
+    let rotatedPoints: RealPointInterface[] = points.map((point: RealPointInterface) => {
+        return rotatePointByAngle(point, angle)
+    })
+
+    // получаем минимальные координаты для нашей фигуры
+    let minY : number, minX : number, maxY : number, maxX : number;
+    minY = rotatedPoints.reduce((acc: number, point: RealPointInterface) => {
+        return Math.min(point.y, acc)
+    }, rotatedPoints[0].y)
+    minX = rotatedPoints.reduce((acc: number, point: RealPointInterface) => {
+        return Math.min(point.x, acc)
+    }, rotatedPoints[0].x)
+    maxY = rotatedPoints.reduce((acc: number, point: RealPointInterface) => {
+        return Math.max(point.y, acc)
+    }, rotatedPoints[0].y)
+    maxX = rotatedPoints.reduce((acc: number, point: RealPointInterface) => {
+        return Math.max(point.x, acc)
+    }, rotatedPoints[0].x)
+
+
+    let answer : RealPointInterface[][] = []
+    for (let y = minY + margin; y < maxY + width; y += width + margin) {
+        let currentPlank : boolean[] = []
+        for (let x_0 = minX; x_0 < maxX; x_0 += X_STEP) {
+            let isGoodLine : boolean = true
+            for (let y_0 = y; y_0 < y + width; y_0 += Y_STEP) {
+                if (!isPointInsidePolygonReal({
+                    x : x_0,
+                    y : y_0
+                }, rotatedPoints)) {
+                    isGoodLine = false
+                }
+            }
+            currentPlank.push(isGoodLine)
+        }
+        let rects = []
+        let lastOpened = undefined;
+        for (let i = 0; i < currentPlank.length; i++) {
+            if (currentPlank[i]) {
+                if (lastOpened === undefined) {
+                    lastOpened = i
+                } else {
+                    if ((i - lastOpened) * X_STEP > height) {
+                        rects.push([lastOpened + 1, i - 1])
+                        lastOpened = i
+                    }
+                }
+            } else {
+                if (lastOpened) {
+                    rects.push([lastOpened + 1, i - 1])
+                    lastOpened = undefined
+                }
+            }
+        }
+        answer = answer.concat(rects.map((element) => {
+            return [{
+                x : element[0] + minX,
+                y : y
+            }, {
+                x : element[0] + minX,
+                y : y + width
+            }, {
+                x : element[1] + minX,
+                y : y + width
+            }, {
+                x : element[1] + minX,
+                y : y
+            }]
+                .map((element) => rotatePointByAngle(element, -angle))
+        }))
+
+    }
+
+    console.log('initial points', points)
+    console.log('actual answer', answer)
+
+    const svg = SVG().size(674, 487);
+
+    for (const rectangle of answer) {
+        const polygon = svg.polygon(rectangle.map(point => {
+            point = realPointToWindow(point, P, -112)
+            return `${point.x}, ${point.y}`
+        }).join(' '));
+        polygon.fill('#75757526');
+    }
+
+    return svg.svg();
+
+    // const fileBlob = new Blob([svgString], { type: 'text/plain' });
+    // const fileUrl = URL.createObjectURL(fileBlob);
+    //
+    // const link = document.createElement('a');
+    // link.href = fileUrl;
+    // link.download = 'data.txt';
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+    // URL.revokeObjectURL(fileUrl);
 
 }

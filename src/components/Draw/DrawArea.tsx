@@ -4,7 +4,7 @@ import DrawLine from "./DrawLine";
 import {
     calculateDistance,
     checkForLineIntersections,
-    findClosestSegment,
+    findClosestSegment, findNearestCellPoint,
     getLengthWindow,
     PointInterface,
     RealPointInterface,
@@ -36,7 +36,8 @@ interface DrawAreaProps {
     setIsStartedAngleChoose ?: (isStartedAngleChoose : boolean) => void,
     isNeedToMakeAgain ?: boolean,
     moveMode ?: boolean,
-    updatePoint ?: (index : number, point : RealPointInterface) => void
+    updatePoint ?: (index : number, point : RealPointInterface) => void,
+    coverage ?: string
 }
 
 
@@ -60,7 +61,8 @@ function DrawArea(props: DrawAreaProps) {
     const [currentAngle, setCurrentAngle] = useState<WindowLineInterface>()
     const [isFinishedAngleChoose, setIsFinishedAngleChoose] = useState<boolean>(false)
     const [angleLine, setAngleLine] = useState<WindowLineInterface>()
-    const [actualAngle, setActualAngle] = useState<number>(0)
+    const [actualAngle, setActualAngle] = useState<number>(0) // theta
+    const [phi, setPhi] = useState<number>(0)
 
     const [movedPoint, setMovedPoint] = useState<number>()
 
@@ -100,18 +102,18 @@ function DrawArea(props: DrawAreaProps) {
                 if (props.straight) {
                     setCurrentLine(findClosestSegment(
                         realPointToWindow(props.points[props.points.length - 1], props.P, props.left),
-                        {
+                        findNearestCellPoint({
                             x: props.cursorPosition.x,
                             y: props.cursorPosition.y
-                        }
+                        }, CELL_SIZE)
                     ))
                 } else {
                     setCurrentLine({
                         first: realPointToWindow(props.points[props.points.length - 1], props.P, props.left),
-                        second: {
+                        second: findNearestCellPoint({
                             x: props.cursorPosition.x,
                             y: props.cursorPosition.y
-                        }
+                        }, CELL_SIZE)
                     })
                 }
             }
@@ -165,7 +167,6 @@ function DrawArea(props: DrawAreaProps) {
         setCurrentAngle(undefined)
         setAngleLine(undefined)
         setIsFinishedAngleChoose(false)
-        setActualAngle(90)
     }, [props.P, props.isNeedToMakeAgain])
 
     useEffect(() => {
@@ -188,6 +189,9 @@ function DrawArea(props: DrawAreaProps) {
 
     return (
         <div className="DrawArea" onClick={handleClickOnArea} onMouseLeave={handleMouseUpPoint} onMouseUp={handleMouseUpPoint} onMouseMove={handleMouseMovePoint}>
+            <div className="DrawArea__Coverage">
+                { typeof props.coverage === 'string' && <div dangerouslySetInnerHTML={{__html: props.coverage}}/> }
+            </div>
             <div className="DrawArea__Lines">
                 <div className="DrawArea__Lines--X">
                     {[...new Array(FULL_WIDTH / CELL_SIZE)].map((_, index: number) => {
@@ -235,6 +239,8 @@ function DrawArea(props: DrawAreaProps) {
                                   activeAngle={currentAngle === line} setActiveAngle={setCurrentAngle}
                                   angleMode={props.angleMode} cursorPosition={props.cursorPosition}
                                   active={activeLine === line} line={line} length={getLengthReal(line)}
+                                  setActualAngle={setActualAngle}
+                                  
                         />
                     ))
                 }

@@ -94,6 +94,9 @@ function App() {
                }}
                sendRedirectTo={sendRedirectTo}
                currentPage={PAGES.DRAW}
+               width={selectedWidth}
+               height={selectedHeight}
+               margin={selectedMargin}
         />
     )
 

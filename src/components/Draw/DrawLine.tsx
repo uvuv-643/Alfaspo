@@ -29,6 +29,7 @@ interface DrawLineProps {
     isFinishedAngleChoose ?: boolean,
     angleLine ?: WindowLineInterface,
     setAngleLine ?: (line : WindowLineInterface) => void,
+    setActualAngle ?: (phi : number) => void,
 }
 
 
@@ -200,6 +201,7 @@ function DrawLine(props: DrawLineProps) {
     const [currentAngle, setCurrentAngle] = useState<number>(0)
     const [theta, setTheta] = useState<number>(DEFAULT_THETA)
     const [direction, setDirection] = useState<boolean>(true)
+    const [correctDirection, setCorrectDirection] = useState<boolean>(false)
 
     const isAbleToChangeAngle = useRef(false)
 
@@ -259,6 +261,36 @@ function DrawLine(props: DrawLineProps) {
         }
     }, [props.cursorPosition])
 
+    useEffect(() => {
+        if (props.angleLine && props.line && props.setActualAngle) {
+            let dx = props.angleLine.second.x - props.angleLine.first.x
+            let dy = props.angleLine.second.y - props.angleLine.first.y
+            let targetAngle = Math.acos(dx / Math.sqrt(dx * dx + dy * dy))
+            if (dy > 0) {
+                targetAngle = 2 * Math.PI - targetAngle
+            }
+            props.setActualAngle(targetAngle)
+        }
+    }, [props.angleLine])
+
+    useEffect(() => {
+        if (props.line) {
+            if ((direction && props.line.second.y - props.line.first.y > 0) || (!direction && props.line.first.y - props.line.second.y > 0)) {
+                setCorrectDirection(true)
+            } else {
+                if (props.line.second.y === props.line.first.y) {
+                    if (props.line.first.x - props.line.second.x > 0 && !direction || props.line.second.x - props.line.first.x > 0 && direction) {
+                        setCorrectDirection(true)
+                    } else {
+                        setCorrectDirection(false)
+                    }
+                } else {
+                    setCorrectDirection(false)
+                }
+            }
+        }
+    }, [direction, props.line])
+
     if (props.line) {
         return (
             <div onClick={handleStartAngle}
@@ -315,11 +347,11 @@ function DrawLine(props: DrawLineProps) {
                                     <path d={
                                         [
                                             "M",
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? 90 : 90 + theta, 80, currentAngle).x,
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? 90 : 90 + theta, 80, currentAngle).y,
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? 90 : 90 + theta, 80, currentAngle).x,
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? 90 : 90 + theta, 80, currentAngle).y,
                                             "A", 80, 80, 0, 0, 0,
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? 90 - theta : 90, 80, currentAngle).x,
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? 90 - theta : 90, 80, currentAngle).y
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? 90 - theta : 90, 80, currentAngle).x,
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? 90 - theta : 90, 80, currentAngle).y
                                         ].join(" ")
                                     } fill="none"/>
                                 </svg>
@@ -327,11 +359,11 @@ function DrawLine(props: DrawLineProps) {
                                     <path d={
                                         [
                                             "M",
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? 90 - theta : -90, 80, currentAngle).x,
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? 90 - theta : -90, 80, currentAngle).y,
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? 90 - theta : -90, 80, currentAngle).x,
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? 90 - theta : -90, 80, currentAngle).y,
                                             "A", 80, 80, 0, 0, 0,
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? -90 : 90 + theta, 80, currentAngle).x,
-                                            getCoordinatesOfCircle(props.angleLine.first, (direction && props.line.second.y - props.line.first.y >= 0) || (!direction && props.line.first.y - props.line.second.y >= 0) ? -90 : 90 + theta, 80, currentAngle).y
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? -90 : 90 + theta, 80, currentAngle).x,
+                                            getCoordinatesOfCircle(props.angleLine.first, correctDirection ? -90 : 90 + theta, 80, currentAngle).y
                                         ].join(" ")
                                     } fill="none"/>
                                 </svg>
