@@ -8,7 +8,6 @@ import {PAGES} from "./enums/Pages";
 import Dimensions from "./components/Dimensions";
 import MaterialElementInterface from "./interfaces/MaterialElementInterface";
 import {SidebarSelectedValues} from "./interfaces/SidebarSelectedValues";
-import useStateParams from "./utils/useStateParams";
 import {DimensionsElementInterface} from "./interfaces/DimensionsElementInterface";
 import Margin from "./components/Margin";
 import {MarginElementInterface} from "./interfaces/MarginElementInterface";
@@ -16,6 +15,8 @@ import Color from "./components/Color";
 import {ColorElementInterface} from "./interfaces/ColorElementInterface";
 import Size from "./components/Size";
 import Draw from "./components/Draw";
+import {RealPointInterface} from "./components/Draw/utils/Utils";
+import material from "./components/Material";
 
 function App() {
 
@@ -29,9 +30,14 @@ function App() {
     const [selectedSizeMode, setSelectedSizeMode] = useState<boolean>(JSON.parse(localStorage.getItem('size-mode') || 'true'))
     const [selectedSize, setSelectedSize] = useState<number>(JSON.parse(localStorage.getItem('size') || '1'))
     const [selectedSizePlacement, setSelectedSizePlacement] = useState<number>(JSON.parse(localStorage.getItem('size-placement') || '1'))
+    const [selectedPoints, setSelectedPoints] = useState<RealPointInterface[]>(JSON.parse(localStorage.getItem('points') || '[]'))
+    const [selectedAngle, setSelectedAngle] = useState<number | null>(JSON.parse(localStorage.getItem('angle') || 'null'))
+    const [finishedBuilding, setFinishedBuilding] = useState<boolean>(JSON.parse(localStorage.getItem('finishedBuilding') || 'false'))
 
     const [selectedValues, setSelectedValues] = useState<SidebarSelectedValues>(JSON.parse(localStorage.getItem('selectedValues') || '{}'))
     const [availableRedirect, setAvailableRedirect] = useState(true)
+
+    const [inputtedSides, setInputtedSides] = useState<string[]>([])
 
     const MaterialElement = (
         <Material
@@ -80,25 +86,81 @@ function App() {
             handleGoToDraw={() => {
                 setSendRedirectTo('/draw')
             }}
+            setInputtedSides={setInputtedSides}
         />
     )
 
     const DrawElement = (
         <Draw selectedValues={selectedValues}
-               availableRedirect={availableRedirect}
-               handleNext={() => {
-                   setSendRedirectTo('/price')
-               }}
-               handleBack={() => {
-                   setSendRedirectTo('/size')
-               }}
-               sendRedirectTo={sendRedirectTo}
-               currentPage={PAGES.DRAW}
-               width={selectedWidth}
-               height={selectedHeight}
-               margin={selectedMargin}
+            availableRedirect={availableRedirect}
+            handleNext={() => {
+                setSendRedirectTo('/price')
+            }}
+            handleBack={() => {
+                setSendRedirectTo('/size')
+            }}
+            sendRedirectTo={sendRedirectTo}
+            currentPage={PAGES.DRAW}
+            width={selectedWidth}
+            material={selectedMaterial}
+            height={selectedHeight}
+            margin={selectedMargin}
+            points={selectedPoints}
+            setPoints={setSelectedPoints}
+            angle={selectedAngle}
+            finishedBuilding={finishedBuilding}
         />
     )
+
+    const renderAttempts = useRef(0)
+
+    const handleSizeSelected = () => {
+        if (inputtedSides.filter((element) => {
+            return (!isNaN(parseInt(element)) && parseInt(element) > 0 && parseInt(element) < 10000)
+        }).length === inputtedSides.length) {
+            let targetSides = inputtedSides.map(element => parseInt(element))
+            if (targetSides.length === 2) {
+                setSelectedPoints([
+                    {x: -targetSides[1] / 2, y: -targetSides[0] / 2},
+                    {x: -targetSides[1] / 2, y: targetSides[0] / 2},
+                    {x: targetSides[1] / 2, y: targetSides[0] / 2},
+                    {x: targetSides[1] / 2, y: -targetSides[0] / 2},
+                    {x: -targetSides[1] / 2, y: -targetSides[0] / 2}
+                ])
+                if (selectedSizePlacement === 1) setSelectedAngle(Math.PI / 2)
+                else setSelectedAngle(0)
+            } else if (targetSides.length === 6 ) {
+                let ab = targetSides[0]
+                let bc = targetSides[1]
+                let cd = targetSides[2]
+                let de = targetSides[3]
+                let ef = targetSides[4]
+                let fa = targetSides[5]
+                if (fa + de !== bc) {
+                    alert('FA + DE має дорівнювати BC')
+                    return
+                }
+                if (cd + ef !== ab) {
+                    alert('CD + EF має дорівнювати AB')
+                    return
+                }
+                setSelectedPoints([
+                    {x: -bc / 2, y: ab / 2},
+                    {x: -bc / 2, y: -ab / 2},
+                    {x: bc / 2, y: -ab / 2},
+                    {x: bc / 2, y: -ab / 2 + cd},
+                    {x: bc / 2 - de, y: -ab / 2 + cd},
+                    {x: bc / 2 - de, y: -ab / 2 + cd + ef},
+                    {x: -bc / 2, y: ab / 2}
+                ])
+                if (selectedSizePlacement === 1) setSelectedAngle(Math.PI / 2)
+                else setSelectedAngle(0)
+            }
+            setSendRedirectTo('/draw')
+        } else {
+            alert("Розміри не повинні перевищувати 10000 мм")
+        }
+    }
 
     useEffect(() => {
         localStorage.setItem('selectedValues', JSON.stringify(selectedValues))
@@ -159,8 +221,6 @@ function App() {
             window.removeEventListener('popstate', handleBackEvent);
         };
     }, []);
-
-    const renderAttempts = useRef(0)
 
     useEffect(() => {
         if (renderAttempts.current > 1 && !availableRedirect) {
@@ -229,9 +289,7 @@ function App() {
                     <Route path="/size" element={<PageWrapper
                         selectedValues={selectedValues}
                         availableRedirect={availableRedirect}
-                        handleNext={() => {
-                            setSendRedirectTo('/material')
-                        }}
+                        handleNext={handleSizeSelected}
                         handleBack={() => {
                             setSendRedirectTo('/color')
                         }}

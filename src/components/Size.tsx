@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import LargeCheckbox from "./global/LargeCheckbox";
 import Checkbox from "./global/Checkbox";
 
@@ -10,7 +10,7 @@ interface SizeProps {
     selectedPlacement : number,
     handleSelectedPlacement : (placement : number) => void,
     handleGoToDraw : () => void,
-    selectedSides ?: number[]
+    setInputtedSides : (data : string[]) => void,
 }
 
 const enum SQUARE_SIDES {
@@ -31,6 +31,28 @@ function Size(props : SizeProps) {
 
     const [focusedSideSquare, setFocusedSideSquare] = useState<SQUARE_SIDES | null>(null)
     const [focusedSidePolygon, setFocusedSidePolygon] = useState<POLYGON_SIDES | null>(null)
+
+    const [sides, setSides] = useState<string[]>([])
+
+    const handleUpdateSides = (side : number, event : any) => {
+        if (side < sides.length) {
+            let oldSides = [...sides]
+            oldSides[side] = event.target.value
+            setSides(oldSides)
+        }
+    }
+
+    useEffect(() => {
+        if (props.selectedSize === 1) {
+            setSides(['', ''])
+        } else if (props.selectedSize === 2) {
+            setSides(['', '', '', '', '', ''])
+        }
+    }, [props.selectedSize])
+
+    useEffect(() => {
+        props.setInputtedSides(sides)
+    }, [sides])
 
     return (
         <div className="Size">
@@ -91,12 +113,12 @@ function Size(props : SizeProps) {
                                 <div className="Size__Length__Wrapper">
                                     <label htmlFor="length1" className={ "Size__Length__Item " + (focusedSideSquare === SQUARE_SIDES.AB ? '_active' : '') }>
                                         <div>AB i CD</div>
-                                        <input id="length1" type="text" onFocus={() => { setFocusedSideSquare(SQUARE_SIDES.AB) }} onBlur={ () => { setFocusedSideSquare(null) } }/>
+                                        <input id="length1" type="text" value={sides[0]} onChange={(event) => handleUpdateSides(0, event)} onFocus={() => { setFocusedSideSquare(SQUARE_SIDES.AB) }} onBlur={ () => { setFocusedSideSquare(null) } }/>
                                         <div>мм</div>
                                     </label>
                                     <label htmlFor="length2" className={ "Size__Length__Item " + (focusedSideSquare === SQUARE_SIDES.BC ? '_active' : '') }>
                                         <div>BC i DA</div>
-                                        <input id="length2" type="text" onFocus={() => { setFocusedSideSquare(SQUARE_SIDES.BC) }} onBlur={ () => { setFocusedSideSquare(null) } } />
+                                        <input id="length2" type="text" value={sides[1]} onChange={(event) => handleUpdateSides(1, event)}  onFocus={() => { setFocusedSideSquare(SQUARE_SIDES.BC) }} onBlur={ () => { setFocusedSideSquare(null) } } />
                                         <div>мм</div>
                                     </label>
                                 </div>
@@ -104,32 +126,32 @@ function Size(props : SizeProps) {
                                 <div className="Size__Length__Wrapper">
                                     <label htmlFor="length3" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.AB ? '_active' : '') }>
                                         <div>AB</div>
-                                        <input id="length3" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.AB) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
+                                        <input id="length3" type="text" value={sides[0]} onChange={(event) => handleUpdateSides(0, event)}  onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.AB) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                     <label htmlFor="length4" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.BC ? '_active' : '') } >
                                         <div>DE</div>
-                                        <input id="length4" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.BC) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
+                                        <input id="length4" type="text" value={sides[3]} onChange={(event) => handleUpdateSides(3, event)}  onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.BC) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                     <label htmlFor="length5" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.CD ? '_active' : '') }>
                                         <div>BC</div>
-                                        <input id="length5" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.CD) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
+                                        <input id="length5" type="text" value={sides[1]} onChange={(event) => handleUpdateSides(1, event)}  onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.CD) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                     <label htmlFor="length6" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.DE ? '_active' : '') }>
                                         <div>EF</div>
-                                        <input id="length6" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.DE) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
+                                        <input id="length6" type="text" value={sides[4]} onChange={(event) => handleUpdateSides(4, event)}  onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.DE) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                     <label htmlFor="length7" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.EF ? '_active' : '') }>
                                         <div>CD</div>
-                                        <input id="length7" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.EF) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
+                                        <input id="length7" type="text" value={sides[2]} onChange={(event) => handleUpdateSides(2, event)}  onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.EF) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                     <label htmlFor="length8" className={ "Size__Length__Item " + (focusedSidePolygon === POLYGON_SIDES.FA ? '_active' : '') }>
                                         <div>FA</div>
-                                        <input id="length8" type="text" onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.FA) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
+                                        <input id="length8" type="text" value={sides[5]} onChange={(event) => handleUpdateSides(5, event)}  onFocus={() => { setFocusedSidePolygon(POLYGON_SIDES.FA) }} onBlur={ () => { setFocusedSidePolygon(null) } } />
                                         <div>мм</div>
                                     </label>
                                 </div>

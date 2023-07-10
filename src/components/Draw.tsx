@@ -14,6 +14,7 @@ import {useNavigate} from "react-router-dom";
 import DrawArea, {CELL_SIZE} from "./Draw/DrawArea";
 import {DimensionsElementInterface} from "../interfaces/DimensionsElementInterface";
 import {MarginElementInterface} from "../interfaces/MarginElementInterface";
+import MaterialElementInterface from "../interfaces/MaterialElementInterface";
 
 interface DrawProps {
     currentPage : PAGES,
@@ -22,9 +23,14 @@ interface DrawProps {
     handleNext : () => void,
     handleBack ?: () => void,
     selectedValues : SidebarSelectedValues,
+    material : MaterialElementInterface | null,
     width : DimensionsElementInterface | null,
     height : DimensionsElementInterface | null,
-    margin : MarginElementInterface | null
+    margin : MarginElementInterface | null,
+    setPoints : (points : RealPointInterface[]) => void,
+    points : RealPointInterface[],
+    angle : number | null,
+    finishedBuilding : boolean
 }
 
 function Draw(props : DrawProps) {
@@ -32,7 +38,7 @@ function Draw(props : DrawProps) {
     const [cursorPosition, setCursorPosition] = useState<WindowPointInterface>()
     const [scroll, setScroll] = useState<number>(0)
     const [usedShift, setUsedShift] = useState<boolean>(false)
-    const [points, setPoints] = useState<RealPointInterface[]>([])
+    // const [points, setPoints] = useState<RealPointInterface[]>([])
     const [inactiveLine, setInactiveLine] = useState<boolean>(false)
     const [P, setP] = useState(100)
     const [finishedBuilding, setFinishedBuilding] = useState<boolean>(false)
@@ -41,12 +47,10 @@ function Draw(props : DrawProps) {
     const [selectedDropping, setSelectedDropping] = useState<number>(1)
     const [cancelledItems, setCancelledItems] = useState<WindowPointInterface[]>([])
     const [rect, setRect] = useState<DOMRect>()
-
     const [actualAngle, setActualAngle] = useState<number>()
     const [isStartedAngleChoose, setIsStartedAngleChoose] = useState<boolean>(false)
     const [isFinishedAngleChoose, setIsFinishedAngleChoose] = useState<boolean>(false)
     const [isNeedToMakeAgain, setIsNeedToMakeAgain] = useState<boolean>(false)
-
     const [angleMode, setAngleMode] = useState<boolean>(false)
     const [moveMode, setMoveMode] = useState<boolean>(false)
     const [coverage, setCoverage] = useState<string>('')
@@ -63,6 +67,7 @@ function Draw(props : DrawProps) {
         }
         return Math.abs(square / 2);
     }
+
     function mouseMoveHandler(event : React.MouseEvent) {
         if (rect) {
             setCursorPosition({
@@ -93,18 +98,18 @@ function Draw(props : DrawProps) {
             }, CELL_SIZE)
             if (usedShift) {
                 currentPoint = findClosestSegment(
-                    realPointToWindow(points[points.length - 1], P, 0),
+                    realPointToWindow(props.points[props.points.length - 1], P, 0),
                     currentPoint
                 ).second
             }
-            if (points.length >= 3 && getLengthWindow( { first: currentPoint, second: realPointToWindow(points[0], P, 0) } ) < 30) {
-                currentPoint = realPointToWindow(points[0], P, 0)
+            if (props.points.length >= 3 && getLengthWindow( { first: currentPoint, second: realPointToWindow(props.points[0], P, 0) } ) < 30) {
+                currentPoint = realPointToWindow(props.points[0], P, 0)
                 setFinishedBuilding(true)
             }
             let newPoint = windowPointToReal(currentPoint, P);
-            let oldPoints = [...points]
+            let oldPoints = [...props.points]
             oldPoints.push(newPoint)
-            setPoints(oldPoints)
+            props.setPoints(oldPoints)
             setCancelledItems([])
         }
     }
@@ -126,25 +131,25 @@ function Draw(props : DrawProps) {
                 isUpdatingScroll.current = false
             }, 200)
         }
-        if ((event.ctrlKey || event.metaKey) && (event.keyCode === 13) && points.length >= 3 && !finishedBuilding) {
-            let currentPoint = realPointToWindow(points[0], P, 0)
+        if ((event.ctrlKey || event.metaKey) && (event.keyCode === 13) && props.points.length >= 3 && !finishedBuilding) {
+            let currentPoint = realPointToWindow(props.points[0], P, 0)
             let newPoint = windowPointToReal(currentPoint, P);
-            let oldPoints = [...points]
+            let oldPoints = [...props.points]
             oldPoints.push(newPoint)
             if (isValidPolygon(oldPoints)) {
                 setFinishedBuilding(true)
-                setPoints(oldPoints)
+                props.setPoints(oldPoints)
             }
         }
         if (event.keyCode === 46 && finishedBuilding && selectedPoint) {
             if (angleMode) return
-            let oldPoints = [...points]
+            let oldPoints = [...props.points]
             let index = oldPoints.indexOf(selectedPoint);
-            if (index > 0 && index < points.length - 1) {
+            if (index > 0 && index < props.points.length - 1) {
                 oldPoints.splice(index, 1);
             }
             if (isValidPolygon(oldPoints)) {
-                setPoints(oldPoints)
+                props.setPoints(oldPoints)
             }
         }
     }
@@ -152,7 +157,7 @@ function Draw(props : DrawProps) {
     const handleReset = (event : React.MouseEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        setPoints([])
+        props.setPoints([])
         setInactiveLine(false)
         setFinishedBuilding(false)
     }
@@ -160,10 +165,10 @@ function Draw(props : DrawProps) {
     const handleBack = (event : React.MouseEvent) => {
         event.preventDefault()
         event.stopPropagation()
-        if (points.length === 0) return
-        let oldPoints = [...points]
-        let items = oldPoints.splice(points.length - 1, 1)
-        setPoints(oldPoints)
+        if (props.points.length === 0) return
+        let oldPoints = [...props.points]
+        let items = oldPoints.splice(props.points.length - 1, 1)
+        props.setPoints(oldPoints)
         let oldCancelledItems = [...cancelledItems]
         oldCancelledItems.push(items[0])
         setCancelledItems(oldCancelledItems)
@@ -173,9 +178,9 @@ function Draw(props : DrawProps) {
         event.preventDefault()
         event.stopPropagation()
         if (cancelledItems.length === 0) return
-        let oldPoints = [...points]
+        let oldPoints = [...props.points]
         oldPoints.push(cancelledItems[cancelledItems.length - 1])
-        setPoints(oldPoints)
+        props.setPoints(oldPoints)
         let oldCancelledItems = [...cancelledItems]
         oldCancelledItems.splice(oldCancelledItems.length - 1, 1)
         setCancelledItems(oldCancelledItems)
@@ -205,48 +210,43 @@ function Draw(props : DrawProps) {
     }
 
     const handleUpdatePoint = (index : number, newPosition : RealPointInterface) => {
-        let oldPoints = [...points]
-        if (index === 0 || index === points.length - 1) {
+        let oldPoints = [...props.points]
+        if (index === 0 || index === props.points.length - 1) {
             oldPoints[0] = newPosition
-            oldPoints[points.length - 1] = newPosition
+            oldPoints[props.points.length - 1] = newPosition
         } else {
             oldPoints[index] = newPosition
         }
         if (isValidPolygon(oldPoints)) {
-            setPoints(oldPoints)
+            props.setPoints(oldPoints)
         }
     }
 
     useEffect(() => {
+        if (finishedBuilding && !angleMode) {
+            setSquare(parseFloat((calculateSquare(props.points) / 1000000).toFixed(2)))
+        }
+    }, [finishedBuilding, props.points])
+
+    useEffect(() => {
         if (scroll > 0) {
-            if (P === 100) setP(200)
+            if (P === 200) setP(300)
+            else if (P === 100) setP(200)
             else if (P === 50) setP(100)
             else if (P === 20) setP(50)
             else if (P === 10) setP(20)
+            else if (P === 300) {}
             else setP(200)
         } else if (scroll < 0) {
             if (P === 200) setP(100)
             else if (P === 100) setP(50)
             else if (P === 50) setP(20)
             else if (P === 20) setP(10)
+            else if (P === 10) {}
             else setP(100)
         }
         setScroll(0)
     }, [scroll])
-
-    useEffect(() => {
-        if (finishedBuilding && !angleMode) {
-            setSquare(parseFloat((calculateSquare(points) / 1000000).toFixed(2)))
-            let allPoints = [...points]
-            allPoints.forEach((point : RealPointInterface) => {
-                let targetWindowPoint = realPointToWindow(point, P, 112)
-                if (targetWindowPoint.x < 0 || targetWindowPoint.y < 0 || targetWindowPoint.x > 900 + 112 || targetWindowPoint.y > 600 + 112) {
-                    setP(P * 2)
-                    return
-                }
-            })
-        }
-    }, [finishedBuilding, points])
 
     useEffect(() => {
         let testPlane = document.querySelector('.Draw');
@@ -265,8 +265,7 @@ function Draw(props : DrawProps) {
         return () => {
             document.removeEventListener('keydown', handleKeyPress);
         };
-    }, [points, finishedBuilding, selectedPoint]);
-
+    }, [props.points, finishedBuilding, selectedPoint]);
 
     useEffect(() => {
         if (props.availableRedirect && props.sendRedirectTo !== null) {
@@ -276,19 +275,41 @@ function Draw(props : DrawProps) {
 
     useEffect(() => {
         if (!angleMode && !moveMode && finishedBuilding && actualAngle !== undefined) {
-            if (props.width && props.height && props.margin) {
-                setCoverage(getPanelLocation(points, props.width.value, props.height.value, props.margin.value, actualAngle, P))
+            if (props.width && props.height && props.margin && props.points.length) {
+                setCoverage(getPanelLocation(props.points, Number(props.material?.id), props.width.value, props.height.value, props.margin.value, actualAngle, P))
             }
         }
-    }, [angleMode, moveMode, finishedBuilding, actualAngle, P])
+    }, [angleMode, moveMode, finishedBuilding, actualAngle, P, props.points])
+
+    useEffect(() => {
+        if (props.angle !== null) {
+            setActualAngle(props.angle)
+        }
+    }, [props.angle])
+
+    useEffect(() => {
+        setFinishedBuilding(props.finishedBuilding)
+    }, [props.finishedBuilding])
+
+    useEffect(() => {
+        localStorage.setItem('finishedBuilding', JSON.stringify(finishedBuilding))
+    }, [finishedBuilding])
+
+    useEffect(() => {
+        localStorage.setItem('points', JSON.stringify(props.points))
+        if (actualAngle !== undefined) {
+            localStorage.setItem('angle', JSON.stringify(actualAngle))
+        }
+    }, [props.points, actualAngle])
 
     if (moveMode) {
         return (
             <div className="Draw" onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
                 <DrawArea
+                    setPoints={props.setPoints}
                     cursorPosition={cursorPosition}
                     scroll={scroll}
-                    points={points}
+                    points={props.points}
                     updatePoint={handleUpdatePoint}
                     P={P}
                     left={0}
@@ -311,6 +332,7 @@ function Draw(props : DrawProps) {
         return (
             <div className="Draw" onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
                 <DrawArea
+                    setPoints={props.setPoints}
                     isNeedToMakeAgain={isNeedToMakeAgain}
                     setActualAngle={setActualAngle}
                     setIsFinishedAngleChoose={setIsFinishedAngleChoose}
@@ -318,7 +340,7 @@ function Draw(props : DrawProps) {
                     cursorPosition={cursorPosition}
                     scroll={scroll}
                     straight={usedShift}
-                    points={points}
+                    points={props.points}
                     inactiveLine={inactiveLine}
                     setInactiveLine={setInactiveLine}
                     P={P}
@@ -376,11 +398,12 @@ function Draw(props : DrawProps) {
             <div className="PageWrapper__Content" style={{position: 'relative'}}>
                 <div className="Draw" style={{width : '674px', height: '487px'}} onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
                     <DrawArea
+                        setPoints={props.setPoints}
                         left={-112}
                         cursorPosition={cursorPosition}
                         scroll={scroll}
                         straight={usedShift}
-                        points={points}
+                        points={props.points}
                         inactiveLine={inactiveLine}
                         setInactiveLine={setInactiveLine}
                         P={P}
@@ -403,10 +426,11 @@ function Draw(props : DrawProps) {
     return (
         <div className="Draw" onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
             <DrawArea
+                setPoints={props.setPoints}
                 cursorPosition={cursorPosition}
                 scroll={scroll}
                 straight={usedShift}
-                points={points}
+                points={props.points}
                 inactiveLine={inactiveLine}
                 setInactiveLine={setInactiveLine}
                 P={P}
@@ -425,7 +449,7 @@ function Draw(props : DrawProps) {
                     <button
                         onClick={handleBack}
                         className="Draw__Hints--Back"
-                        style={{ opacity: points.length === 0 ? 0.5 : 1 }}
+                        style={{ opacity: props.points.length === 0 ? 0.5 : 1 }}
                     ><img src="/images/draw/back.svg" alt="#"/></button>
                     <button
                         onClick={handleNext}

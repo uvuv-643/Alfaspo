@@ -18,6 +18,19 @@ export interface WindowLineInterface {
     second: WindowPointInterface,
 }
 
+const PANEL_NEAREST_DISTANCE = 300
+const PANEL_INSIDE_DISTANCE = 1000
+const STRINGER_SMALL_SIZE = 30
+
+const STEEL_MAX_STRINGER = 3900
+const STEEL_MAX_PANEL = 6000
+const ALUMINUM_MAX_STRINGER = 3600
+const ALUMINUM_MAX_PANEL = 4000
+const ACOUSTIC_MAX_STRINGER = 5000
+const ACOUSTIC_MAX_PANEL = 5000
+const ACOUSTIC_MAX_PANEL_H105 = 4000
+
+
 export function checkForLineIntersections(lines: WindowLineInterface[]) : boolean {
 
     function areCrossing(
@@ -206,15 +219,10 @@ export function rotatePointByAngle(point : PointInterface, angle : number) {
     }
 }
 
-export function getPanelLocation(points: RealPointInterface[], width: number, height: number, margin : number, angle: number, P : number) {
+export function getPanelLocation(points: RealPointInterface[], material: number, width: number, height: number, margin : number, angle: number, P : number) {
 
-    const X_STEP = 1
-    const Y_STEP = 1
-
-
-    console.log('initial point to window points', points.map((point) => {
-        return realPointToWindow(point, P, -112)
-    }))
+    const X_STEP = 5
+    const Y_STEP = 5
 
     // поворачиваем фигуру так, чтобы панели лежали вдоль OX
     let rotatedPoints: RealPointInterface[] = points.map((point: RealPointInterface) => {
@@ -236,8 +244,8 @@ export function getPanelLocation(points: RealPointInterface[], width: number, he
         return Math.max(point.x, acc)
     }, rotatedPoints[0].x)
 
-
-    let answer : RealPointInterface[][] = []
+    let rectangles : RealPointInterface[][] = []
+    let panels : number[][][] = []
     for (let y = minY + margin; y < maxY + width; y += width + margin) {
         let currentPlank : boolean[] = []
         for (let x_0 = minX; x_0 < maxX; x_0 += X_STEP) {
@@ -252,26 +260,42 @@ export function getPanelLocation(points: RealPointInterface[], width: number, he
             }
             currentPlank.push(isGoodLine)
         }
-        let rects = []
+        let rects: number[][] = []
         let lastOpened = undefined;
-        for (let i = 0; i < currentPlank.length; i++) {
+
+        let currentPanelLimit = STEEL_MAX_PANEL;
+        if (material === 2) {
+            currentPanelLimit = ALUMINUM_MAX_PANEL
+        } else if (material === 3) {
+            currentPanelLimit = ACOUSTIC_MAX_PANEL
+            if (height === 105) {
+                currentPanelLimit = ACOUSTIC_MAX_PANEL_H105
+            }
+        }
+
+        for (let i = 0; i < currentPlank.length; i += 1) {
             if (currentPlank[i]) {
                 if (lastOpened === undefined) {
                     lastOpened = i
                 } else {
-                    if ((i - lastOpened) * X_STEP > height) {
-                        rects.push([lastOpened + 1, i - 1])
+                    if ((i - lastOpened) * X_STEP > currentPanelLimit) {
+                        rects.push([lastOpened * X_STEP + 1, i * X_STEP - 1])
                         lastOpened = i
                     }
                 }
             } else {
                 if (lastOpened) {
-                    rects.push([lastOpened + 1, i - 1])
+                    rects.push([lastOpened * X_STEP + 1, i * X_STEP - 1])
                     lastOpened = undefined
                 }
             }
         }
-        answer = answer.concat(rects.map((element) => {
+        if (lastOpened) {
+            rects.push([lastOpened * X_STEP + 1 , currentPlank.length * X_STEP - 1])
+            lastOpened = undefined
+        }
+        panels.push(rects)
+        rectangles = rectangles.concat(rects.map((element) => {
             return [{
                 x : element[0] + minX,
                 y : y
@@ -287,33 +311,342 @@ export function getPanelLocation(points: RealPointInterface[], width: number, he
             }]
                 .map((element) => rotatePointByAngle(element, -angle))
         }))
-
     }
 
-    console.log('initial points', points)
-    console.log('actual answer', answer)
+    const bad_panels: { row: number[]; x: number[] }[] = [];
 
-    const svg = SVG().size(674, 487);
+    function try_to_fix_panels(): number {
+        for (let panelIndex = 0; panelIndex < bad_panels.length; panelIndex++) {
+            const panel = bad_panels[panelIndex];
+            const rows = panel.row;
+            const borders = panel.x;
+            for (let currentPanelIndex = 0; currentPanelIndex < bad_panels.length; currentPanelIndex++) {
+                if (panelIndex === currentPanelIndex) {
+                    continue;
+                }
+                const currentPanel = bad_panels[currentPanelIndex];
+                const currentRows = currentPanel.row;
+                const currentBorders = currentPanel.x;
+                if (
+                    Math.abs(rows[0] - currentRows[currentRows.length - 1]) === 1 ||
+                    Math.abs(rows[rows.length - 1] - currentRows[0]) === 1
+                ) {
+                    const targetBorder = [
+                        Math.max(currentBorders[0], borders[0]),
+                        Math.min(currentBorders[1], borders[1])
+                    ];
+                    if (targetBorder[0] <= targetBorder[1]) {
+                        if (panelIndex > currentPanelIndex) {
+                            bad_panels.splice(panelIndex, 1);
+                            bad_panels.splice(currentPanelIndex, 1);
+                        } else {
+                            bad_panels.splice(currentPanelIndex, 1);
+                            bad_panels.splice(panelIndex, 1);
+                        }
+                        const newPanels = [...currentRows];
+                        for (const row of rows) {
+                            newPanels.push(row);
+                        }
+                        bad_panels.push({ row: Array.from(new Set(newPanels)).sort(), x: targetBorder });
+                        return 0;
+                    }
+                }
+            }
+        }
+        return 1;
+    }
 
-    for (const rectangle of answer) {
+    function is_point_inside_panels(row: number, x: number): boolean {
+        if (row >= 0) {
+            for (const panel of panels[row]) {
+                if (panel.length === 2 && panel[0] <= x && panel[1] >= x) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    let max_X = Math.max(...panels.flat(3).filter(item => Number.isInteger(item)));
+    let min_X = Math.min(...panels.flat(3).filter(item => Number.isInteger(item)));
+    const stringers: { [key: number]: number[] } = {};
+
+    for (let x = PANEL_NEAREST_DISTANCE + min_X; x < max_X; x += PANEL_INSIDE_DISTANCE) {
+        panels.forEach((plate, index) => {
+            let is_met = false;
+            plate.forEach(different_plate => {
+                if (x > different_plate[0] && x < different_plate[1]) {
+                    is_met = true;
+                }
+            });
+            if (is_met) {
+                if (x in stringers) {
+                    stringers[x].push(index);
+                } else {
+                    stringers[x] = [index];
+                }
+            }
+        });
+    }
+
+    const transformed_stringers: { [key: number]: number[][] } = {};
+    for (const [key, value] of Object.entries(stringers)) {
+        const sublists: number[][] = [];
+        let start_num = value[0];
+        let end_num = value[0];
+        for (let i = 1; i < value.length; i++) {
+            const num = value[i];
+            if (num === end_num + 1) {
+                end_num = num;
+            } else {
+                sublists.push([start_num, end_num]);
+                start_num = num;
+                end_num = num;
+            }
+        }
+        if (value[value.length - 1] !== end_num + 1) {
+            sublists.push([start_num, end_num]);
+        }
+        transformed_stringers[parseInt(key)] = sublists;
+    }
+
+    for (let row = 0; row < panels.length; row++) {
+        for (let col = 0; col < panels[row].length; col++) {
+            let count_intersections = 0;
+            for (const [x, current_stringers] of Object.entries(transformed_stringers)) {
+                for (const current_stringer of current_stringers) {
+                    const is_row_between_interval = row >= current_stringer[0] && row <= current_stringer[1];
+                    const is_col_between_interval = parseInt(x) >= panels[row][col][0] && parseInt(x) <= panels[row][col][1];
+                    if (is_row_between_interval && is_col_between_interval) {
+                        count_intersections += 1;
+                    }
+                }
+            }
+            if (count_intersections < 2) {
+                bad_panels.push({ row: [row], x: [panels[row][col][0], panels[row][col][1]] });
+            }
+        }
+    }
+
+    const all_stringers_by_rows: { [key: number]: number[] } = {};
+    for (const [x, current_stringers] of Object.entries(transformed_stringers)) {
+        for (const stringer of current_stringers) {
+            for (let stringer_row = stringer[0]; stringer_row <= stringer[1]; stringer_row++) {
+                if (!(stringer_row in all_stringers_by_rows)) {
+                    all_stringers_by_rows[stringer_row] = [];
+                }
+                all_stringers_by_rows[stringer_row].push(parseInt(x));
+            }
+        }
+    }
+
+    for (let row = 0; row < panels.length; row++) {
+        for (let j = 0; j < panels[row].length; j++) {
+            const [border_from, border_to] = panels[row][j];
+            const first_panel = [border_from, border_from + PANEL_NEAREST_DISTANCE];
+            const last_panel = [border_to - PANEL_NEAREST_DISTANCE, border_to];
+            let is_met = false;
+            if (row in all_stringers_by_rows) {
+                for (const stringer of all_stringers_by_rows[row]) {
+                    if (stringer >= first_panel[0] && stringer <= first_panel[1]) {
+                        is_met = true;
+                        break;
+                    }
+                }
+            }
+            if (!is_met) {
+                bad_panels.push({ row: [row], x: first_panel });
+            }
+            is_met = false;
+            if (row in all_stringers_by_rows) {
+                for (const stringer of all_stringers_by_rows[row]) {
+                    if (stringer >= last_panel[0] && stringer <= last_panel[1]) {
+                        is_met = true;
+                        break;
+                    }
+                }
+            }
+            if (!is_met) {
+                bad_panels.push({ row: [row], x: last_panel });
+            }
+        }
+    }
+
+    while (true) {
+        if (try_to_fix_panels()) {
+            break;
+        }
+    }
+
+    for (const panel of bad_panels) {
+        const middle_x = (panel.x[1] + panel.x[0]) / 2;
+        for (let stringer_row = panel.row[0]; stringer_row <= panel.row[panel.row.length - 1]; stringer_row++) {
+            if (!(stringer_row in all_stringers_by_rows)) {
+                all_stringers_by_rows[stringer_row] = [];
+            }
+            all_stringers_by_rows[stringer_row].push(middle_x);
+        }
+    }
+
+    min_X = PANEL_INSIDE_DISTANCE * PANEL_INSIDE_DISTANCE;
+    max_X = 0;
+    for (const [index, row] of Object.entries(all_stringers_by_rows)) {
+        min_X = Math.min(min_X, Math.min(...row));
+        max_X = Math.max(max_X, Math.max(...row));
+    }
+    min_X = Math.floor(min_X);
+    max_X = Math.floor(max_X);
+    const target_answer: { x: number; rows: number[] }[] = [];
+    for (let x = min_X; x <= max_X; x += STRINGER_SMALL_SIZE) {
+        const current_cx_answer: number[] = [];
+        for (const [c_index, xx] of Object.entries(all_stringers_by_rows)) {
+            for (const cx of xx) {
+                if (Math.abs(x - cx) < STRINGER_SMALL_SIZE / 2) {
+                    current_cx_answer.push(parseInt(c_index));
+                }
+            }
+        }
+        if (current_cx_answer.length) {
+            const target_list = Array.from(new Set(current_cx_answer)).sort((a, b) => parseInt(a.toString()) - parseInt(b.toString()));
+            target_answer.push({ x, rows: target_list });
+        }
+    }
+
+
+    for (let i = 0; i < target_answer.length; i++) {
+        const rows = target_answer[i].rows;
+        for (let j = 0; j < rows.length - 1; j++) {
+            if (rows[j + 1] - rows[j] !== 1) {
+                target_answer.push({ x: target_answer[i].x, rows: rows.slice(j + 1) });
+                rows.splice(j + 1);
+                break;
+            }
+        }
+    }
+
+    for (let index = 0; index < target_answer.length; index++) {
+        const element = target_answer[index];
+        const x = element.x;
+        let rows = element.rows;
+        if (rows.length === 2) {
+            if (is_point_inside_panels(rows[0] - 1, x)) {
+                rows.unshift(rows[0] - 1);
+            } else if (is_point_inside_panels(rows[1] + 1, x)) {
+                rows.push(rows[1] + 1);
+            }
+        } else if (rows.length === 1) {
+            if (is_point_inside_panels(rows[0] - 1, x) && is_point_inside_panels(rows[0] + 1, x)) {
+                rows.unshift(rows[0] - 1);
+                rows.push(rows[1] + 1);
+            } else if (is_point_inside_panels(rows[0] + 1, x) && is_point_inside_panels(rows[0] + 2, x)) {
+                rows.push(rows[0] + 1);
+                rows.push(rows[0] + 2);
+            } else if (is_point_inside_panels(rows[0] - 1, x) && is_point_inside_panels(rows[0] - 2, x)) {
+                rows.unshift(rows[0] - 1);
+                rows.unshift(rows[0] - 1);
+            } else if (is_point_inside_panels(rows[0] - 1, x)) {
+                rows.unshift(rows[0] - 1);
+            } else if (is_point_inside_panels(rows[0] + 1, x)) {
+                rows.push(rows[0] + 1);
+            }
+        }
+        target_answer[index].rows = rows;
+    }
+
+    let currentStringersLimit = STEEL_MAX_STRINGER;
+    if (material === 2) {
+        currentStringersLimit = ALUMINUM_MAX_STRINGER
+    } else if (material === 3) {
+        currentStringersLimit = ACOUSTIC_MAX_STRINGER
+    }
+
+    for (let i = 0; i < target_answer.length; i++) {
+        const rows = target_answer[i].rows;
+        for (let j = 0; j < rows.length - 2; j++) {
+            if (j * (margin + width) > currentStringersLimit) {
+                target_answer.push({ x: target_answer[i].x + 100, rows: rows.slice(j + 1) });
+                rows.splice(j + 1);
+                break;
+            }
+        }
+    }
+
+    let stringerPoints : any[] = []
+    for (let i = 0; i < target_answer.length; i++) {
+        const leftBorder = target_answer[i].rows[0]
+        const rightBorder = target_answer[i].rows[target_answer[i].rows.length - 1]
+        const pointsCount = Math.max(2, ((rightBorder - leftBorder + 1) * (width + margin) - 2 * PANEL_NEAREST_DISTANCE) / PANEL_INSIDE_DISTANCE)
+        if (pointsCount === 2 && rightBorder - leftBorder < 6) {
+            if (rightBorder - leftBorder !== 2) {
+                stringerPoints.push({'x': target_answer[i].x, 'row': leftBorder + 1})
+                stringerPoints.push({'x': target_answer[i].x, 'row': rightBorder - 1})
+            } else {
+                stringerPoints.push({'x': target_answer[i].x, 'row': leftBorder})
+                stringerPoints.push({'x': target_answer[i].x, 'row': rightBorder})
+            }
+        } else {
+            for (let p = 0; p < pointsCount; p++) {
+                let pointRow = leftBorder + Math.round((p + 1) * (rightBorder - leftBorder) / (pointsCount + 1))
+                if (!(stringerPoints.length && pointRow === stringerPoints[stringerPoints.length - 1].row)) {
+                    stringerPoints.push({'x': target_answer[i].x, 'row': pointRow})
+                }
+            }
+        }
+    }
+
+    let connectionPoints : WindowPointInterface[] = []
+    for (let i = 0; i < stringerPoints.length; i++) {
+        let x = stringerPoints[i].x
+        let rows = stringerPoints[i].row
+        connectionPoints.push(realPointToWindow(rotatePointByAngle({
+            x: minX + x,
+            y: minY + margin + (width + margin) * stringerPoints[i].row + width * 0.5
+        }, -angle), P, -112))
+    }
+
+
+    let lines : any[] = []
+    for (let i = 0; i < target_answer.length; i++) {
+        let x = target_answer[i].x
+        let rows = target_answer[i].rows
+        lines.push({
+            first: realPointToWindow(rotatePointByAngle({
+                x: minX + x,
+                y: minY + margin + (width + margin) * rows[0]
+            }, -angle), P, -112),
+            second: realPointToWindow(rotatePointByAngle({
+                x: minX + x,
+                y: minY + (width + margin) * (rows[rows.length - 1] + 1)
+            }, -angle), P, -112)
+        })
+    }
+
+    const svg = SVG().size(2700, 1800);
+    for (const rectangle of rectangles) {
         const polygon = svg.polygon(rectangle.map(point => {
             point = realPointToWindow(point, P, -112)
-            return `${point.x}, ${point.y}`
+            return `${point.x + 900}, ${point.y + 600}`
         }).join(' '));
-        polygon.fill('#75757526');
+        polygon.fill('#808080');
+    }
+    for (const line of lines) {
+        if (P >= 100) {
+            svg.line(line.first.x + 900, line.first.y + 600, line.second.x + 900, line.second.y + 600)
+                .stroke({ color: '#000', width: 2 })
+        } else {
+            svg.line(line.first.x + 900, line.first.y + 600, line.second.x + 900, line.second.y + 600)
+                .stroke({ color: '#000', width: 4 })
+        }
+
+    }
+    for (const point of connectionPoints) {
+        if (P >= 100) {
+            svg.rect(6, 6).fill('#000').move(900 + point.x - 3, 600 + point.y - 3)
+        } else {
+            svg.rect(10, 10).fill('#000').move(900 + point.x - 5, 600 + point.y - 5)
+        }
     }
 
     return svg.svg();
-
-    // const fileBlob = new Blob([svgString], { type: 'text/plain' });
-    // const fileUrl = URL.createObjectURL(fileBlob);
-    //
-    // const link = document.createElement('a');
-    // link.href = fileUrl;
-    // link.download = 'data.txt';
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
-    // URL.revokeObjectURL(fileUrl);
 
 }

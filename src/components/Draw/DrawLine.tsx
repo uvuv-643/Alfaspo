@@ -19,13 +19,14 @@ interface DrawLineProps {
     lastLine?: boolean
     supportLine?: boolean,
     inactive?: boolean,
-    active?: boolean,
     cursorPosition?: WindowPointInterface,
     angleMode?: boolean,
     setActiveAngle?: (line: WindowLineInterface) => void,
+    setActiveAngleId ?: (id : number) => void,
     activeAngle?: boolean,
     points?: WindowPointInterface[],
     P?: number,
+    lineId?: number,
     isFinishedAngleChoose ?: boolean,
     angleLine ?: WindowLineInterface,
     setAngleLine ?: (line : WindowLineInterface) => void,
@@ -296,12 +297,12 @@ function DrawLine(props: DrawLineProps) {
             <div onClick={handleStartAngle}
                  className={"DrawLine " + (!props.activeAngle && props.angleLine ? '_inactive' : activeLine ? '_active' : props.lastLine ? '_last' : props.supportLine ? '_support' : '')}>
                 <div className={"DrawLine__Line " + (props.inactive ? '_inactive' : '')}>
-                    <svg width={900} height={600}>
+                    <svg width={3 * 900} height={3 * 600} className={"DrawLine__Line__Svg"}>
                         <line
-                            x1={props.line?.first.x}
-                            y1={props.line?.first.y}
-                            x2={props.line?.second.x}
-                            y2={props.line?.second.y}
+                            x1={props.line?.first.x + 900}
+                            y1={props.line?.first.y + 600}
+                            x2={props.line?.second.x + 900}
+                            y2={props.line?.second.y + 600}
                         />
                     </svg>
                 </div>
