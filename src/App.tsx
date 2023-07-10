@@ -156,6 +156,7 @@ function App() {
                 if (selectedSizePlacement === 1) setSelectedAngle(Math.PI / 2)
                 else setSelectedAngle(0)
             }
+            setFinishedBuilding(true)
             setSendRedirectTo('/draw')
         } else {
             alert("Розміри не повинні перевищувати 10000 мм")
