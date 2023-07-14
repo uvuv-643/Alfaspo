@@ -95,7 +95,7 @@ function Draw(props : DrawProps) {
             let currentPoint = findNearestCellPoint({
                 x : cursorPosition.x,
                 y : cursorPosition.y
-            }, CELL_SIZE)
+            }, P, props.points.length ? props.points[0] : undefined)
             if (usedShift) {
                 currentPoint = findClosestSegment(
                     realPointToWindow(props.points[props.points.length - 1], P, 0),
@@ -230,19 +230,17 @@ function Draw(props : DrawProps) {
 
     useEffect(() => {
         if (scroll > 0) {
-            if (P === 200) setP(300)
-            else if (P === 100) setP(200)
+            if (P === 100) setP(200)
             else if (P === 50) setP(100)
             else if (P === 20) setP(50)
             else if (P === 10) setP(20)
-            else if (P === 300) {}
+            else if (P === 200) {}
             else setP(200)
         } else if (scroll < 0) {
             if (P === 200) setP(100)
             else if (P === 100) setP(50)
             else if (P === 50) setP(20)
-            else if (P === 20) setP(10)
-            else if (P === 10) {}
+            else if (P === 20) {}
             else setP(100)
         }
         setScroll(0)
@@ -399,7 +397,7 @@ function Draw(props : DrawProps) {
                 <div className="Draw" style={{width : '674px', height: '487px'}} onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
                     <DrawArea
                         setPoints={props.setPoints}
-                        left={-112}
+                        left={0}
                         cursorPosition={cursorPosition}
                         scroll={scroll}
                         straight={usedShift}

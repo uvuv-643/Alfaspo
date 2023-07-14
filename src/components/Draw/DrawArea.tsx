@@ -86,7 +86,7 @@ function DrawArea(props: DrawAreaProps) {
     const handleMouseMovePoint = (event : React.MouseEvent) => {
         if (movRef.current) {
             if (movedPoint !== undefined && props.cursorPosition && props.updatePoint) {
-                props.updatePoint(movedPoint, (windowPointToReal(findNearestCellPoint(props.cursorPosition, CELL_SIZE), props.P)))
+                props.updatePoint(movedPoint, (windowPointToReal(findNearestCellPoint(props.cursorPosition, props.P, props.points.length ? props.points[0] : undefined), props.P)))
             }
             if (!props.moveMode) handleMouseMovePlane(event)
         }
@@ -152,7 +152,7 @@ function DrawArea(props: DrawAreaProps) {
                         findNearestCellPoint({
                             x: props.cursorPosition.x,
                             y: props.cursorPosition.y
-                        }, CELL_SIZE)
+                        }, props.P, props.points.length ? props.points[0] : undefined)
                     ))
                 } else {
                     setCurrentLine({
@@ -160,7 +160,7 @@ function DrawArea(props: DrawAreaProps) {
                         second: findNearestCellPoint({
                             x: props.cursorPosition.x,
                             y: props.cursorPosition.y
-                        }, CELL_SIZE)
+                        }, props.P, props.points.length ? props.points[0] : undefined)
                     })
                 }
             }
@@ -237,7 +237,7 @@ function DrawArea(props: DrawAreaProps) {
                     {[...new Array(4 * FULL_WIDTH / CELL_SIZE)].map((_, index: number) => {
                         return (
                             <div style={{
-                                left: CELL_SIZE * (index + 1) + (props.points.length > 0 ? realPointToWindow(props.points[0], props.P, props.left).x % CELL_SIZE : 0)
+                                left: realPointToWindow({ x : (props.points.length ? props.points[0].x : 0) + props.P * (index), y: 0}, props.P, 0).x
                             }}/>
                         )
                     })}
@@ -246,7 +246,7 @@ function DrawArea(props: DrawAreaProps) {
                     {[...new Array(4 * FULL_HEIGHT / CELL_SIZE)].map((_, index: number) => {
                         return (
                             <div style={{
-                                top: CELL_SIZE * (index + 1) + (props.points.length > 0 ? realPointToWindow(props.points[0], props.P, props.left).y % CELL_SIZE : 0)
+                                top: realPointToWindow({ y : (props.points.length ? props.points[0].y : 0) + props.P * (index), x: 0}, props.P, 0).y
                             }}/>
                         )
                     })}

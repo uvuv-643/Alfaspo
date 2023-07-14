@@ -1,6 +1,7 @@
 import {CELL_SIZE, FULL_HEIGHT, FULL_WIDTH} from "../DrawArea";
 import margin from "../../Margin";
 import {PointArray, SVG} from '@svgdotjs/svg.js';
+import React from "react";
 
 export interface PointInterface {
     x: number,
@@ -180,10 +181,27 @@ export function calculateDistance(point: PointInterface, lines: WindowLineInterf
 
 }
 
-export function findNearestCellPoint(point : WindowPointInterface, cellSize : number) {
+// export function findNearestCellPoint(point : WindowPointInterface, cellSize : number) {
+//     return {
+//         x: Math.round(point.x / cellSize) * cellSize,
+//         y: Math.round(point.y / cellSize) * cellSize
+//     }
+// }
+
+export function findNearestCellPoint(point : WindowPointInterface, P : number, initialPoint ?: RealPointInterface) {
+    let xs = [...new Array(4 * FULL_WIDTH / CELL_SIZE)].map((_, index: number) => {
+        return realPointToWindow({ x : (initialPoint ? initialPoint.x : 0) + P * (index), y: 0}, P, 0).x
+    })
+    let ys = [...new Array(4 * FULL_HEIGHT / CELL_SIZE)].map((_, index: number) => {
+        return realPointToWindow({ y : (initialPoint ? initialPoint.y : 0) + P * (index), x: 0}, P, 0).y
+    })
+    console.log({
+        x: Math.round(point.x / CELL_SIZE) * CELL_SIZE + (xs[0] % CELL_SIZE),
+        y: Math.round(point.y / CELL_SIZE) * CELL_SIZE + (ys[0] % CELL_SIZE)
+    })
     return {
-        x: Math.round(point.x / cellSize) * cellSize,
-        y: Math.round(point.y / cellSize) * cellSize
+        x: Math.round(point.x / CELL_SIZE) * CELL_SIZE + (xs[0] % CELL_SIZE),
+        y: Math.round(point.y / CELL_SIZE) * CELL_SIZE + (ys[0] % CELL_SIZE)
     }
 }
 
@@ -601,7 +619,7 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         connectionPoints.push(realPointToWindow(rotatePointByAngle({
             x: minX + x,
             y: minY + margin + (width + margin) * stringerPoints[i].row + width * 0.5
-        }, -angle), P, -112))
+        }, -angle), P, 0))
     }
 
 
@@ -613,18 +631,18 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
             first: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
                 y: minY + margin + (width + margin) * rows[0]
-            }, -angle), P, -112),
+            }, -angle), P, 0),
             second: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
                 y: minY + (width + margin) * (rows[rows.length - 1] + 1)
-            }, -angle), P, -112)
+            }, -angle), P, 0)
         })
     }
 
     const svg = SVG().size(2700, 1800);
     for (const rectangle of rectangles) {
         const polygon = svg.polygon(rectangle.map(point => {
-            point = realPointToWindow(point, P, -112)
+            point = realPointToWindow(point, P, 0)
             return `${point.x + 900}, ${point.y + 600}`
         }).join(' '));
         polygon.fill('#808080');
