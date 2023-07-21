@@ -38,6 +38,7 @@ function App() {
     const [availableRedirect, setAvailableRedirect] = useState(true)
 
     const [inputtedSides, setInputtedSides] = useState<string[]>([])
+    const [preferSize, setPreferSize] = useState<number>(0)
 
     const MaterialElement = (
         <Material
@@ -92,6 +93,7 @@ function App() {
 
     const DrawElement = (
         <Draw selectedValues={selectedValues}
+              preferSize={preferSize}
             availableRedirect={availableRedirect}
             handleNext={() => {
                 setSendRedirectTo('/price')
@@ -120,13 +122,18 @@ function App() {
         }).length === inputtedSides.length) {
             let targetSides = inputtedSides.map(element => parseInt(element))
             if (targetSides.length === 2) {
+                let preferSizeValue = [10, 20, 50, 100, 200].reduce((prev, curr) => {
+                    let X = Math.max(targetSides[0], targetSides[1]) / 10
+                    return Math.abs(curr - X) < Math.abs(prev - X) ? curr : prev;
+                })
                 setSelectedPoints([
-                    {x: -targetSides[1] / 2, y: -targetSides[0] / 2},
-                    {x: -targetSides[1] / 2, y: targetSides[0] / 2},
-                    {x: targetSides[1] / 2, y: targetSides[0] / 2},
-                    {x: targetSides[1] / 2, y: -targetSides[0] / 2},
-                    {x: -targetSides[1] / 2, y: -targetSides[0] / 2}
+                    {x: -targetSides[1] / 2 - 6 * preferSizeValue, y: -targetSides[0] / 2 - 2 * preferSizeValue},
+                    {x: -targetSides[1] / 2 - 6 * preferSizeValue, y: targetSides[0] / 2 - 2 * preferSizeValue},
+                    {x: targetSides[1] / 2 - 6 * preferSizeValue, y: targetSides[0] / 2 - 2 * preferSizeValue},
+                    {x: targetSides[1] / 2 - 6 * preferSizeValue, y: -targetSides[0] / 2 - 2 * preferSizeValue},
+                    {x: -targetSides[1] / 2 - 6 * preferSizeValue, y: -targetSides[0] / 2 - 2 * preferSizeValue}
                 ])
+                setPreferSize(preferSizeValue)
                 if (selectedSizePlacement === 1) setSelectedAngle(Math.PI / 2)
                 else setSelectedAngle(0)
             } else if (targetSides.length === 6 ) {
@@ -144,15 +151,20 @@ function App() {
                     alert('CD + EF має дорівнювати AB')
                     return
                 }
+                let preferSizeValue = [10, 20, 50, 100, 200].reduce((prev, curr) => {
+                    let X = Math.max(ab, bc) / 10
+                    return Math.abs(curr - X) < Math.abs(prev - X) ? curr : prev;
+                })
                 setSelectedPoints([
-                    {x: -bc / 2, y: ab / 2},
-                    {x: -bc / 2, y: -ab / 2},
-                    {x: bc / 2, y: -ab / 2},
-                    {x: bc / 2, y: -ab / 2 + cd},
-                    {x: bc / 2 - de, y: -ab / 2 + cd},
-                    {x: bc / 2 - de, y: -ab / 2 + cd + ef},
-                    {x: -bc / 2, y: ab / 2}
+                    {x: -bc / 2 - 6 * preferSizeValue, y: ab / 2 - 2 * preferSizeValue},
+                    {x: -bc / 2 - 6 * preferSizeValue, y: -ab / 2 - 2 * preferSizeValue},
+                    {x: bc / 2 - 6 * preferSizeValue, y: -ab / 2 - 4 * preferSizeValue},
+                    {x: bc / 2 - 6 * preferSizeValue, y: -ab / 2 + cd - 2 * preferSizeValue},
+                    {x: bc / 2 - de - 6 * preferSizeValue, y: -ab / 2 + cd - 2 * preferSizeValue},
+                    {x: bc / 2 - de - 6 * preferSizeValue, y: -ab / 2 + cd + ef - 2 * preferSizeValue},
+                    {x: -bc / 2 - 6 * preferSizeValue, y: ab / 2 - 2 * preferSizeValue}
                 ])
+                setPreferSize(preferSizeValue)
                 if (selectedSizePlacement === 1) setSelectedAngle(Math.PI / 2)
                 else setSelectedAngle(0)
             }

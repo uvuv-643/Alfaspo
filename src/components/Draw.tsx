@@ -30,7 +30,8 @@ interface DrawProps {
     setPoints : (points : RealPointInterface[]) => void,
     points : RealPointInterface[],
     angle : number | null,
-    finishedBuilding : boolean
+    finishedBuilding : boolean,
+    preferSize : number
 }
 
 function Draw(props : DrawProps) {
@@ -227,6 +228,18 @@ function Draw(props : DrawProps) {
             setSquare(parseFloat((calculateSquare(props.points) / 1000000).toFixed(2)))
         }
     }, [finishedBuilding, props.points])
+
+    useEffect(() => {
+        if (!finishedBuilding) {
+            setP(100)
+        }
+    }, [finishedBuilding])
+
+    useEffect(() => {
+        if (props.preferSize) {
+            setP(props.preferSize)
+        }
+    }, [props.preferSize])
 
     useEffect(() => {
         if (scroll > 0) {

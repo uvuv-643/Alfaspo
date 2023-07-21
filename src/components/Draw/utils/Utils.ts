@@ -21,7 +21,7 @@ export interface WindowLineInterface {
 
 const PANEL_NEAREST_DISTANCE = 300
 const PANEL_INSIDE_DISTANCE = 1000
-const STRINGER_SMALL_SIZE = 30
+const STRINGER_SMALL_SIZE = 65
 
 const STEEL_MAX_STRINGER = 3900
 const STEEL_MAX_PANEL = 6000
@@ -195,10 +195,6 @@ export function findNearestCellPoint(point : WindowPointInterface, P : number, i
     let ys = [...new Array(4 * FULL_HEIGHT / CELL_SIZE)].map((_, index: number) => {
         return realPointToWindow({ y : (initialPoint ? initialPoint.y : 0) + P * (index), x: 0}, P, 0).y
     })
-    console.log({
-        x: Math.round(point.x / CELL_SIZE) * CELL_SIZE + (xs[0] % CELL_SIZE),
-        y: Math.round(point.y / CELL_SIZE) * CELL_SIZE + (ys[0] % CELL_SIZE)
-    })
     return {
         x: Math.round(point.x / CELL_SIZE) * CELL_SIZE + (xs[0] % CELL_SIZE),
         y: Math.round(point.y / CELL_SIZE) * CELL_SIZE + (ys[0] % CELL_SIZE)
@@ -238,6 +234,8 @@ export function rotatePointByAngle(point : PointInterface, angle : number) {
 }
 
 export function getPanelLocation(points: RealPointInterface[], material: number, width: number, height: number, margin : number, angle: number, P : number) {
+
+    angle = Math.round(angle * 180 / Math.PI) * Math.PI / 180
 
     const X_STEP = 5
     const Y_STEP = 5
@@ -331,6 +329,17 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         }))
     }
 
+    // const jsonData = JSON.stringify(panels);
+    // const blob = new Blob([jsonData], { type: 'application/json' });
+    // const url = URL.createObjectURL(blob);
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.download = 'data.json';
+    // document.body.appendChild(a);
+    // a.click();
+    // document.body.removeChild(a);
+    // URL.revokeObjectURL(url);
+
     const bad_panels: { row: number[]; x: number[] }[] = [];
 
     function try_to_fix_panels(): number {
@@ -357,15 +366,17 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
                         if (panelIndex > currentPanelIndex) {
                             bad_panels.splice(panelIndex, 1);
                             bad_panels.splice(currentPanelIndex, 1);
-                        } else {
+                        } else if (panelIndex < currentPanelIndex) {
                             bad_panels.splice(currentPanelIndex, 1);
+                            bad_panels.splice(panelIndex, 1);
+                        } else {
                             bad_panels.splice(panelIndex, 1);
                         }
                         const newPanels = [...currentRows];
                         for (const row of rows) {
                             newPanels.push(row);
                         }
-                        bad_panels.push({ row: Array.from(new Set(newPanels)).sort(), x: targetBorder });
+                        bad_panels.push({ row: Array.from(new Set(newPanels)).sort((a, b) => a - b), x: targetBorder });
                         return 0;
                     }
                 }
@@ -513,9 +524,9 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         max_X = Math.max(max_X, Math.max(...row));
     }
     min_X = Math.floor(min_X);
-    max_X = Math.floor(max_X);
+    max_X = Math.ceil(max_X);
     const target_answer: { x: number; rows: number[] }[] = [];
-    for (let x = min_X; x <= max_X; x += STRINGER_SMALL_SIZE) {
+    for (let x = min_X; x <= max_X + STRINGER_SMALL_SIZE; x += STRINGER_SMALL_SIZE) {
         const current_cx_answer: number[] = [];
         for (const [c_index, xx] of Object.entries(all_stringers_by_rows)) {
             for (const cx of xx) {
@@ -529,7 +540,6 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
             target_answer.push({ x, rows: target_list });
         }
     }
-
 
     for (let i = 0; i < target_answer.length; i++) {
         const rows = target_answer[i].rows;
@@ -582,7 +592,7 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         const rows = target_answer[i].rows;
         for (let j = 0; j < rows.length - 2; j++) {
             if (j * (margin + width) > currentStringersLimit) {
-                target_answer.push({ x: target_answer[i].x + 100, rows: rows.slice(j + 1) });
+                target_answer.push({ x: target_answer[i].x + 100, rows: rows.slice(j + 1 - Math.ceil(100 / (margin + width))) });
                 rows.splice(j + 1);
                 break;
             }
@@ -630,11 +640,11 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         lines.push({
             first: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
-                y: minY + margin + (width + margin) * rows[0]
+                y: minY + (width + margin) * rows[0]
             }, -angle), P, 0),
             second: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
-                y: minY + (width + margin) * (rows[rows.length - 1] + 1)
+                y: Math.min(maxY, minY + (width + margin) * (rows[rows.length - 1] + 1) + margin)
             }, -angle), P, 0)
         })
     }
