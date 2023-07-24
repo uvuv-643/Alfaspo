@@ -3,7 +3,10 @@ import {
     calculateAngle,
     calculateDistance,
     getCoordinatesOfCircle,
-    getLengthWindow, realPointToWindow,
+    getLengthWindow,
+    isPointBetweenYCoordinates,
+    isPointToTheLeft,
+    realPointToWindow,
     WindowLineInterface,
     WindowPointInterface
 } from "./utils/Utils";
@@ -22,15 +25,15 @@ interface DrawLineProps {
     cursorPosition?: WindowPointInterface,
     angleMode?: boolean,
     setActiveAngle?: (line: WindowLineInterface) => void,
-    setActiveAngleId ?: (id : number) => void,
+    setActiveAngleId?: (id: number) => void,
     activeAngle?: boolean,
     points?: WindowPointInterface[],
     P?: number,
     lineId?: number,
-    isFinishedAngleChoose ?: boolean,
-    angleLine ?: WindowLineInterface,
-    setAngleLine ?: (line : WindowLineInterface) => void,
-    setActualAngle ?: (phi : number) => void,
+    isFinishedAngleChoose?: boolean,
+    angleLine?: WindowLineInterface,
+    setAngleLine?: (line: WindowLineInterface) => void,
+    setActualAngle?: (phi: number) => void,
 }
 
 
@@ -124,20 +127,10 @@ function DrawLine(props: DrawLineProps) {
         const numVertices = polygon.length;
         let j = numVertices - 1;
         for (let i = 0; i < numVertices; i++) {
-            const vertexA = realPointToWindow(polygon[i], P, 0);
-            const vertexB = realPointToWindow(polygon[j], P, 0);
-            if (
-                (vertexA.y < point.y && vertexB.y >= point.y) ||
-                (vertexB.y < point.y && vertexA.y >= point.y)
-            ) {
-                if (
-                    vertexA.x +
-                    ((point.y - vertexA.y) / (vertexB.y - vertexA.y)) *
-                    (vertexB.x - vertexA.x) <
-                    point.x
-                ) {
-                    isInside = !isInside;
-                }
+            const vertexA = realPointToWindow(polygon[i], P);
+            const vertexB = realPointToWindow(polygon[j], P);
+            if (!isPointBetweenYCoordinates(vertexA, vertexB, point) && isPointToTheLeft(vertexA, vertexB, point)) {
+                isInside = !isInside;
             }
             j = i;
         }
@@ -248,7 +241,10 @@ function DrawLine(props: DrawLineProps) {
             let targetDistance = calculateDistance(props.cursorPosition, [props.line])
             if (getLengthWindow({first: props.cursorPosition, second: props.line.first}) < LINE_LIMIT_THRESHOLD) {
                 setActiveLine(false)
-            } else if (getLengthWindow({first: props.cursorPosition, second: props.line.second}) < LINE_LIMIT_THRESHOLD) {
+            } else if (getLengthWindow({
+                first: props.cursorPosition,
+                second: props.line.second
+            }) < LINE_LIMIT_THRESHOLD) {
                 setActiveLine(false)
             } else {
                 setActiveLine(targetDistance < LINE_LIMIT_THRESHOLD / 2)

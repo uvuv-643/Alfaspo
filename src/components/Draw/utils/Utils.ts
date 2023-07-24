@@ -1,7 +1,5 @@
 import {CELL_SIZE, FULL_HEIGHT, FULL_WIDTH} from "../DrawArea";
-import margin from "../../Margin";
-import {PointArray, SVG} from '@svgdotjs/svg.js';
-import React from "react";
+import {SVG} from '@svgdotjs/svg.js';
 
 export interface PointInterface {
     x: number,
@@ -95,11 +93,10 @@ function getCoordinatesOfCircle(O : WindowPointInterface | undefined, theta : nu
     let xs = R * Math.cos(theta / 180 * Math.PI)
     let ys = R * Math.sin(theta / 180 * Math.PI)
     if (O) {
-        let target = {
-            x : O.x + xs * Math.cos(phi / 180 * Math.PI) + ys * Math.sin(phi / 180 * Math.PI),
+        return {
+            x: O.x + xs * Math.cos(phi / 180 * Math.PI) + ys * Math.sin(phi / 180 * Math.PI),
             y: O.y + ys * Math.cos(phi / 180 * Math.PI) - xs * Math.sin(phi / 180 * Math.PI),
         }
-        return target
     }
     return {
         x : 0,
@@ -123,10 +120,10 @@ export function windowPointToReal(point: WindowPointInterface, P : number): Real
     }
 }
 
-export function realPointToWindow(point: RealPointInterface, P : number, left : number): WindowPointInterface {
+export function realPointToWindow(point: RealPointInterface, P : number): WindowPointInterface {
     return {
-        x: point.x * CELL_SIZE / P + FULL_WIDTH / 2 + left,
-        y: point.y * CELL_SIZE / P + FULL_HEIGHT / 2 + left * 0.666
+        x: point.x * CELL_SIZE / P + FULL_WIDTH / 2,
+        y: point.y * CELL_SIZE / P + FULL_HEIGHT / 2
     }
 }
 
@@ -190,10 +187,10 @@ export function calculateDistance(point: PointInterface, lines: WindowLineInterf
 
 export function findNearestCellPoint(point : WindowPointInterface, P : number, initialPoint ?: RealPointInterface) {
     let xs = [...new Array(4 * FULL_WIDTH / CELL_SIZE)].map((_, index: number) => {
-        return realPointToWindow({ x : (initialPoint ? initialPoint.x : 0) + P * (index), y: 0}, P, 0).x
+        return realPointToWindow({ x : (initialPoint ? initialPoint.x : 0) + P * (index), y: 0}, P).x
     })
     let ys = [...new Array(4 * FULL_HEIGHT / CELL_SIZE)].map((_, index: number) => {
-        return realPointToWindow({ y : (initialPoint ? initialPoint.y : 0) + P * (index), x: 0}, P, 0).y
+        return realPointToWindow({ y : (initialPoint ? initialPoint.y : 0) + P * (index), x: 0}, P).y
     })
     return {
         x: Math.round(point.x / CELL_SIZE) * CELL_SIZE + (xs[0] % CELL_SIZE),
@@ -208,18 +205,8 @@ function isPointInsidePolygonReal(point: RealPointInterface, polygon: RealPointI
     for (let i = 0; i < numVertices; i++) {
         const vertexA = polygon[i]
         const vertexB = polygon[j]
-        if (
-            (vertexA.y < point.y && vertexB.y >= point.y) ||
-            (vertexB.y < point.y && vertexA.y >= point.y)
-        ) {
-            if (
-                vertexA.x +
-                ((point.y - vertexA.y) / (vertexB.y - vertexA.y)) *
-                (vertexB.x - vertexA.x) <
-                point.x
-            ) {
-                isInside = !isInside;
-            }
+        if (!isPointBetweenYCoordinates(vertexA, vertexB, point) && isPointToTheLeft(vertexA, vertexB, point)) {
+            isInside = !isInside;
         }
         j = i;
     }
@@ -231,6 +218,22 @@ export function rotatePointByAngle(point : PointInterface, angle : number) {
         x: point.x * Math.cos(angle) - point.y * Math.sin(angle),
         y: point.y * Math.cos(angle) + point.x * Math.sin(angle)
     }
+}
+
+export function isPointBetweenYCoordinates(vertexA : PointInterface, vertexB : PointInterface, point : PointInterface) {
+    return (
+        (vertexA.y >= point.y || vertexB.y < point.y) &&
+        (vertexB.y >= point.y || vertexA.y < point.y)
+    );
+}
+
+
+export function isPointToTheLeft(vertexA : PointInterface, vertexB : PointInterface, point : PointInterface) {
+    return (
+        vertexA.x +
+        ((point.y - vertexA.y) / (vertexB.y - vertexA.y)) * (vertexB.x - vertexA.x) <
+        point.x
+    );
 }
 
 export function getPanelLocation(points: RealPointInterface[], material: number, width: number, height: number, margin : number, angle: number, P : number) {
@@ -519,7 +522,7 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
 
     min_X = PANEL_INSIDE_DISTANCE * PANEL_INSIDE_DISTANCE;
     max_X = 0;
-    for (const [index, row] of Object.entries(all_stringers_by_rows)) {
+    for (const [_, row] of Object.entries(all_stringers_by_rows)) {
         min_X = Math.min(min_X, Math.min(...row));
         max_X = Math.max(max_X, Math.max(...row));
     }
@@ -625,11 +628,10 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
     let connectionPoints : WindowPointInterface[] = []
     for (let i = 0; i < stringerPoints.length; i++) {
         let x = stringerPoints[i].x
-        let rows = stringerPoints[i].row
         connectionPoints.push(realPointToWindow(rotatePointByAngle({
             x: minX + x,
             y: minY + margin + (width + margin) * stringerPoints[i].row + width * 0.5
-        }, -angle), P, 0))
+        }, -angle), P))
     }
 
 
@@ -641,37 +643,37 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
             first: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
                 y: minY + (width + margin) * rows[0]
-            }, -angle), P, 0),
+            }, -angle), P),
             second: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
                 y: Math.min(maxY, minY + (width + margin) * (rows[rows.length - 1] + 1) + margin)
-            }, -angle), P, 0)
+            }, -angle), P)
         })
     }
 
     const svg = SVG().size(2700, 1800);
     for (const rectangle of rectangles) {
         const polygon = svg.polygon(rectangle.map(point => {
-            point = realPointToWindow(point, P, 0)
-            return `${point.x + 900}, ${point.y + 600}`
+            point = realPointToWindow(point, P)
+            return `${point.x + FULL_WIDTH}, ${point.y + FULL_HEIGHT}`
         }).join(' '));
         polygon.fill('#808080');
     }
     for (const line of lines) {
         if (P >= 100) {
-            svg.line(line.first.x + 900, line.first.y + 600, line.second.x + 900, line.second.y + 600)
+            svg.line(line.first.x + FULL_WIDTH, line.first.y + FULL_HEIGHT, line.second.x + FULL_WIDTH, line.second.y + FULL_HEIGHT)
                 .stroke({ color: '#000', width: 2 })
         } else {
-            svg.line(line.first.x + 900, line.first.y + 600, line.second.x + 900, line.second.y + 600)
+            svg.line(line.first.x + FULL_WIDTH, line.first.y + FULL_HEIGHT, line.second.x + FULL_WIDTH, line.second.y + FULL_HEIGHT)
                 .stroke({ color: '#000', width: 4 })
         }
 
     }
     for (const point of connectionPoints) {
         if (P >= 100) {
-            svg.rect(6, 6).fill('#000').move(900 + point.x - 3, 600 + point.y - 3)
+            svg.rect(6, 6).fill('#000').move(900 + point.x - 3, FULL_HEIGHT + point.y - 3)
         } else {
-            svg.rect(10, 10).fill('#000').move(900 + point.x - 5, 600 + point.y - 5)
+            svg.rect(10, 10).fill('#000').move(900 + point.x - 5, FULL_HEIGHT + point.y - 5)
         }
     }
 

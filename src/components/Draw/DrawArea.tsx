@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {MutableRefObject, useEffect, useRef, useState} from 'react'
 import Point from './Point'
 import DrawLine from "./DrawLine";
 import {
@@ -13,7 +13,6 @@ import {
     WindowPointInterface,
     windowPointToReal
 } from "./utils/Utils";
-import point from "./Point";
 
 export const FULL_WIDTH = 900
 export const FULL_HEIGHT = 600
@@ -31,7 +30,6 @@ interface DrawAreaProps {
     finished: boolean,
     setSelectedPoint: (point: RealPointInterface) => void,
     selectedPoint?: RealPointInterface,
-    left: number,
     angleMode?: boolean,
     setActualAngle ?: (angle : number) => void,
     setIsFinishedAngleChoose ?: (isFinishedAngleChoose : boolean) => void,
@@ -39,11 +37,27 @@ interface DrawAreaProps {
     isNeedToMakeAgain ?: boolean,
     moveMode ?: boolean,
     updatePoint ?: (index : number, point : RealPointInterface) => void,
-    coverage ?: string
+    coverage ?: string,
+    setWasMovedMouse : (wasMovedMouse : boolean) => void
 }
 
 
 function DrawArea(props: DrawAreaProps) {
+
+    const [figureLines, setFigureLines] = useState<WindowLineInterface[]>([])
+    const [supportLines, setSupportLines] = useState<WindowLineInterface[]>([])
+    const [currentLine, setCurrentLine] = useState<WindowLineInterface>()
+    const [currentAngle, setCurrentAngle] = useState<WindowLineInterface>()
+    const [isFinishedAngleChoose, setIsFinishedAngleChoose] = useState<boolean>(false)
+    const [angleLine, setAngleLine] = useState<WindowLineInterface>()
+    const [actualAngle, setActualAngle] = useState<number>(0) // theta
+    const [movedPoint, setMovedPoint] = useState<number>()
+
+    const [initialPositionMovingPointsOnPlane, setInitialPositionMovingPointsOnPlane] = useState<WindowPointInterface>()
+    const [targetOffsetMovingPointsOnPlane, setTargetOffsetMovingPointsOnPlane] = useState<WindowPointInterface>()
+    const [targetOffsetMovingPointsOnPlanePoint, setTargetOffsetMovingPointsOnPlanePoint] = useState<WindowPointInterface>()
+
+    const movRef = useRef(false)
 
     function getLengthReal(line: WindowLineInterface | null | undefined) {
         if (line) {
@@ -56,22 +70,6 @@ function DrawArea(props: DrawAreaProps) {
         return 0
     }
 
-    const [figureLines, setFigureLines] = useState<WindowLineInterface[]>([])
-    const [supportLines, setSupportLines] = useState<WindowLineInterface[]>([])
-    const [currentLine, setCurrentLine] = useState<WindowLineInterface>()
-    const [activeLine, setActiveLine] = useState<WindowLineInterface>()
-    const [currentAngle, setCurrentAngle] = useState<WindowLineInterface>()
-    const [isFinishedAngleChoose, setIsFinishedAngleChoose] = useState<boolean>(false)
-    const [angleLine, setAngleLine] = useState<WindowLineInterface>()
-    const [actualAngle, setActualAngle] = useState<number>(0) // theta
-    const [movedPoint, setMovedPoint] = useState<number>()
-
-    const [initialPositionMovingPointsOnPlane, setInitialPositionMovingPointsOnPlane] = useState<WindowPointInterface>()
-    const [targetOffsetMovingPointsOnPlane, setTargetOffsetMovingPointsOnPlane] = useState<WindowPointInterface>()
-    const [targetOffsetMovingPointsOnPlanePoint, setTargetOffsetMovingPointsOnPlanePoint] = useState<WindowPointInterface>()
-
-    const movRef = useRef(true)
-
     const handleClickOnArea = () => {
         if (angleLine) {
             setIsFinishedAngleChoose(true)
@@ -83,21 +81,21 @@ function DrawArea(props: DrawAreaProps) {
     }
 
 
-    const handleMouseMovePoint = (event : React.MouseEvent) => {
+    const handleMouseMovePoint = () => {
         if (movRef.current) {
             if (movedPoint !== undefined && props.cursorPosition && props.updatePoint) {
                 props.updatePoint(movedPoint, (windowPointToReal(findNearestCellPoint(props.cursorPosition, props.P, props.points.length ? props.points[0] : undefined), props.P)))
             }
-            if (!props.moveMode) handleMouseMovePlane(event)
+            if (!props.moveMode) handleMouseMovePlane()
         }
     }
 
-    const handleMouseUpPoint = (event : React.MouseEvent) => {
+    const handleMouseUpPoint = () => {
         setMovedPoint(undefined)
-        handleMouseDownMovePlane()
+        handleMouseUpMovePlane()
     }
 
-    const handleMouseDownMovePlane = () => {
+    const handleMouseUpMovePlane = () => {
         movRef.current = false
         if (targetOffsetMovingPointsOnPlane) {
             let newPoints = [...props.points].map(point => {
@@ -107,15 +105,19 @@ function DrawArea(props: DrawAreaProps) {
                 }
             })
             props.setPoints(newPoints)
-            setTargetOffsetMovingPointsOnPlanePoint({ x: 0, y : 0})
+            setTargetOffsetMovingPointsOnPlanePoint(undefined)
         }
     }
 
     useEffect(() => {
-        setTargetOffsetMovingPointsOnPlane({ x: 0, y : 0})
+        props.setWasMovedMouse(!!targetOffsetMovingPointsOnPlane && (targetOffsetMovingPointsOnPlane.x !== 0 || targetOffsetMovingPointsOnPlane.y !== 0))
+    }, [targetOffsetMovingPointsOnPlane])
+
+    useEffect(() => {
+        setTargetOffsetMovingPointsOnPlane(undefined)
     }, [props.points])
 
-    const handleMouseMovePlane = (event : React.MouseEvent) => {
+    const handleMouseMovePlane = () => {
         if (movRef.current && initialPositionMovingPointsOnPlane && props.cursorPosition) {
             setTargetOffsetMovingPointsOnPlane({
                 x: props.cursorPosition.x - initialPositionMovingPointsOnPlane.x,
@@ -128,8 +130,9 @@ function DrawArea(props: DrawAreaProps) {
         }
     }
 
-    const handleMouseDownMove = (event : React.MouseEvent) => {
+    const handleMouseDownMove = () => {
         movRef.current = true
+        console.log('mouse down')
         setInitialPositionMovingPointsOnPlane(props.cursorPosition)
     }
 
@@ -139,16 +142,16 @@ function DrawArea(props: DrawAreaProps) {
                 first: {
                     x: props.cursorPosition.x,
                     y: props.cursorPosition.y
-                }, second: realPointToWindow(props.points[0], props.P, props.left)
+                }, second: realPointToWindow(props.points[0], props.P)
             }) < 30) {
                 setCurrentLine({
-                    first: realPointToWindow(props.points[props.points.length - 1], props.P, props.left),
-                    second: realPointToWindow(props.points[0], props.P, props.left)
+                    first: realPointToWindow(props.points[props.points.length - 1], props.P),
+                    second: realPointToWindow(props.points[0], props.P)
                 })
             } else {
                 if (props.straight) {
                     setCurrentLine(findClosestSegment(
-                        realPointToWindow(props.points[props.points.length - 1], props.P, props.left),
+                        realPointToWindow(props.points[props.points.length - 1], props.P),
                         findNearestCellPoint({
                             x: props.cursorPosition.x,
                             y: props.cursorPosition.y
@@ -156,7 +159,7 @@ function DrawArea(props: DrawAreaProps) {
                     ))
                 } else {
                     setCurrentLine({
-                        first: realPointToWindow(props.points[props.points.length - 1], props.P, props.left),
+                        first: realPointToWindow(props.points[props.points.length - 1], props.P),
                         second: findNearestCellPoint({
                             x: props.cursorPosition.x,
                             y: props.cursorPosition.y
@@ -171,8 +174,8 @@ function DrawArea(props: DrawAreaProps) {
         let newFigureLines = []
         for (let i = 0; i < props.points.length - 1; i++) {
             newFigureLines.push({
-                first: realPointToWindow(props.points[i], props.P, props.left),
-                second: realPointToWindow(props.points[i + 1], props.P, props.left)
+                first: realPointToWindow(props.points[i], props.P),
+                second: realPointToWindow(props.points[i + 1], props.P)
             })
         }
         setFigureLines(newFigureLines)
@@ -182,7 +185,7 @@ function DrawArea(props: DrawAreaProps) {
             let newSupportLines = []
             for (let i = 0; i < props.points.length - 1; i++) {
                 newSupportLines.push({
-                    first: realPointToWindow(props.points[i], props.P, props.left),
+                    first: realPointToWindow(props.points[i], props.P),
                     second: currentLine.second
                 })
             }
@@ -195,7 +198,7 @@ function DrawArea(props: DrawAreaProps) {
             if (checkForLineIntersections([...figureLines, currentLine]) || calculateDistance(currentLine.second, figureLines) < 10) {
                 if (getLengthReal({
                     first: currentLine.second,
-                    second: realPointToWindow(props.points[0], props.P, props.left)
+                    second: realPointToWindow(props.points[0], props.P)
                 }) < 3) {
                     props.setInactiveLine(false)
                 } else {
@@ -237,7 +240,7 @@ function DrawArea(props: DrawAreaProps) {
                     {[...new Array(4 * FULL_WIDTH / CELL_SIZE)].map((_, index: number) => {
                         return (
                             <div style={{
-                                left: realPointToWindow({ x : (props.points.length ? props.points[0].x : 0) + props.P * (index), y: 0}, props.P, 0).x
+                                left: realPointToWindow({ x : (props.points.length ? props.points[0].x : 0) + props.P * (index), y: 0}, props.P).x
                             }}/>
                         )
                     })}
@@ -246,7 +249,25 @@ function DrawArea(props: DrawAreaProps) {
                     {[...new Array(4 * FULL_HEIGHT / CELL_SIZE)].map((_, index: number) => {
                         return (
                             <div style={{
-                                top: realPointToWindow({ y : (props.points.length ? props.points[0].y : 0) + props.P * (index), x: 0}, props.P, 0).y
+                                top: realPointToWindow({ y : (props.points.length ? props.points[0].y : 0) + props.P * (index), x: 0}, props.P).y
+                            }}/>
+                        )
+                    })}
+                </div>
+                <div className="DrawArea__Lines--X DrawArea__Lines--X--Large">
+                    {[...new Array(FULL_WIDTH / CELL_SIZE)].map((_, index: number) => {
+                        return (
+                            <div style={{
+                                left: realPointToWindow({ x : (props.points.length ? props.points[0].x : 0) + 4 * props.P * (index), y: 0}, props.P).x
+                            }}/>
+                        )
+                    })}
+                </div>
+                <div className="DrawArea__Lines--Y DrawArea__Lines--Y--Large">
+                    {[...new Array(FULL_HEIGHT / CELL_SIZE)].map((_, index: number) => {
+                        return (
+                            <div style={{
+                                top: realPointToWindow({ y : (props.points.length ? props.points[0].y : 0) + 4 * props.P * (index), x: 0}, props.P).y
                             }}/>
                         )
                     })}
@@ -255,9 +276,13 @@ function DrawArea(props: DrawAreaProps) {
             {props.points.length && !props.finished ? (
                 <div className="DrawArea__Axis" style={{ left : targetOffsetMovingPointsOnPlane?.x, top: targetOffsetMovingPointsOnPlane?.y }}>
                     <div className="DrawArea__Axis--X"
-                         style={{left: realPointToWindow(props.points[props.points.length - 1], props.P, props.left).x}}/>
+                         style={{
+                             left: realPointToWindow(props.points[props.points.length - 1], props.P).x,
+                        }}/>
                     <div className="DrawArea__Axis--Y"
-                         style={{top: realPointToWindow(props.points[props.points.length - 1], props.P, props.left).y}}/>
+                         style={{
+                             top: realPointToWindow(props.points[props.points.length - 1], props.P).y
+                        }}/>
                 </div>
             ) : <></>}
             <div className="DrawArea__Points" style={{ left : targetOffsetMovingPointsOnPlanePoint?.x, top: targetOffsetMovingPointsOnPlanePoint?.y }}>
@@ -266,15 +291,15 @@ function DrawArea(props: DrawAreaProps) {
                         <Point
                             index={index}
                             onMouseDown={handleMouseDownPoint}
-                            inactive={ !!(angleLine && currentAngle && getLengthWindow({ first: currentAngle.first, second : realPointToWindow(point, props.P, props.left) }) > 10 && getLengthWindow({ first: currentAngle.second, second : realPointToWindow(point, props.P, props.left) }) > 10) } selected={point === props.selectedPoint && !props.angleMode} setSelected={() => {
+                            inactive={ !!(angleLine && currentAngle && getLengthWindow({ first: currentAngle.first, second : realPointToWindow(point, props.P) }) > 10 && getLengthWindow({ first: currentAngle.second, second : realPointToWindow(point, props.P) }) > 10) } selected={point === props.selectedPoint && !props.angleMode} setSelected={() => {
                             props.finished && props.setSelectedPoint(point)
-                        }} finished={props.finished} point={realPointToWindow(point, props.P, props.left)}/>
+                        }} finished={props.finished} point={realPointToWindow(point, props.P)}/>
                     )
                 })}
             </div>
             <div className="DrawArea__Figure" style={{ left : targetOffsetMovingPointsOnPlane?.x, top: targetOffsetMovingPointsOnPlane?.y }}>
                 {
-                    figureLines.map((line, index) => (
+                    figureLines.map((line) => (
                         <DrawLine angleLine={angleLine} isFinishedAngleChoose={isFinishedAngleChoose} setAngleLine={setAngleLine} P={props.P} points={props.points}
                                   activeAngle={JSON.stringify(currentAngle) === JSON.stringify(line)} setActiveAngle={setCurrentAngle}
                                   angleMode={props.angleMode} cursorPosition={props.cursorPosition}
@@ -286,7 +311,7 @@ function DrawArea(props: DrawAreaProps) {
                 }
             </div>
             {!props.finished && (
-                <div className="DrawArea__SupportLines" style={{ left : targetOffsetMovingPointsOnPlane?.x, top: targetOffsetMovingPointsOnPlane?.y }}>
+                <div className="DrawArea__SupportLines" style={{ display : (targetOffsetMovingPointsOnPlane?.x !== undefined && targetOffsetMovingPointsOnPlane?.y !== undefined) ? 'none' : 'block' }}>
                     {
                         supportLines.map((line) => (
                             <DrawLine line={line} length={getLengthReal(line)} supportLine/>
@@ -295,7 +320,7 @@ function DrawArea(props: DrawAreaProps) {
                 </div>
             )}
             {!props.finished && (
-                <div className="DrawArea__CurrentLine" style={{ left : targetOffsetMovingPointsOnPlane?.x, top: targetOffsetMovingPointsOnPlane?.y }}>
+                <div className="DrawArea__CurrentLine" style={{ display : (targetOffsetMovingPointsOnPlane?.x !== undefined && targetOffsetMovingPointsOnPlane?.y !== undefined) ? 'none' : 'block' }}>
                     <DrawLine line={currentLine} length={getLengthReal(currentLine)} lastLine
                               inactive={props.inactiveLine}/>
                 </div>

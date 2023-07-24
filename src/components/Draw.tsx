@@ -1,4 +1,4 @@
-import React, {ReactNode, useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import '../assets/styles/main.scss'
 import {
     findClosestSegment, findNearestCellPoint,
@@ -11,7 +11,7 @@ import Sidebar from "./global/Sidebar";
 import {PAGES} from "../enums/Pages";
 import {SidebarSelectedValues} from "../interfaces/SidebarSelectedValues";
 import {useNavigate} from "react-router-dom";
-import DrawArea, {CELL_SIZE} from "./Draw/DrawArea";
+import DrawArea from "./Draw/DrawArea";
 import {DimensionsElementInterface} from "../interfaces/DimensionsElementInterface";
 import {MarginElementInterface} from "../interfaces/MarginElementInterface";
 import MaterialElementInterface from "../interfaces/MaterialElementInterface";
@@ -56,6 +56,8 @@ function Draw(props : DrawProps) {
     const [moveMode, setMoveMode] = useState<boolean>(false)
     const [coverage, setCoverage] = useState<string>('')
 
+    const [wasMovedMouse, setWasMovedMouse] = useState<boolean>(false)
+
     const isUpdatingScroll = useRef(false)
     const navigate = useNavigate()
 
@@ -91,20 +93,21 @@ function Draw(props : DrawProps) {
         }
     }
 
-    function handleClickOnArea(event : React.MouseEvent) {
-        if (cursorPosition && !inactiveLine && !finishedBuilding) {
+    function handleClickOnArea() {
+        console.log(wasMovedMouse)
+        if (cursorPosition && !inactiveLine && !finishedBuilding && !wasMovedMouse) {
             let currentPoint = findNearestCellPoint({
                 x : cursorPosition.x,
                 y : cursorPosition.y
             }, P, props.points.length ? props.points[0] : undefined)
             if (usedShift) {
                 currentPoint = findClosestSegment(
-                    realPointToWindow(props.points[props.points.length - 1], P, 0),
+                    realPointToWindow(props.points[props.points.length - 1], P),
                     currentPoint
                 ).second
             }
-            if (props.points.length >= 3 && getLengthWindow( { first: currentPoint, second: realPointToWindow(props.points[0], P, 0) } ) < 30) {
-                currentPoint = realPointToWindow(props.points[0], P, 0)
+            if (props.points.length >= 3 && getLengthWindow( { first: currentPoint, second: realPointToWindow(props.points[0], P) } ) < 30) {
+                currentPoint = realPointToWindow(props.points[0], P)
                 setFinishedBuilding(true)
             }
             let newPoint = windowPointToReal(currentPoint, P);
@@ -113,6 +116,7 @@ function Draw(props : DrawProps) {
             props.setPoints(oldPoints)
             setCancelledItems([])
         }
+
     }
 
     const handleKeyPress = (event : any) => {
@@ -133,7 +137,7 @@ function Draw(props : DrawProps) {
             }, 200)
         }
         if ((event.ctrlKey || event.metaKey) && (event.keyCode === 13) && props.points.length >= 3 && !finishedBuilding) {
-            let currentPoint = realPointToWindow(props.points[0], P, 0)
+            let currentPoint = realPointToWindow(props.points[0], P)
             let newPoint = windowPointToReal(currentPoint, P);
             let oldPoints = [...props.points]
             oldPoints.push(newPoint)
@@ -323,12 +327,12 @@ function Draw(props : DrawProps) {
                     points={props.points}
                     updatePoint={handleUpdatePoint}
                     P={P}
-                    left={0}
                     finished={true}
                     inactiveLine={false}
                     setInactiveLine={() => {}}
                     setSelectedPoint={() => {}}
                     straight={false}
+                    setWasMovedMouse={setWasMovedMouse}
                     moveMode
                 />
                 <div className="Draw__Hints Draw__Hints--Move">
@@ -358,7 +362,7 @@ function Draw(props : DrawProps) {
                     finished={finishedBuilding}
                     setSelectedPoint={setSelectedPoint}
                     selectedPoint={selectedPoint}
-                    left={0}
+                    setWasMovedMouse={setWasMovedMouse}
                     angleMode
                 />
                 <div className="Draw__Hints--Angle">
@@ -410,7 +414,6 @@ function Draw(props : DrawProps) {
                 <div className="Draw" style={{width : '674px', height: '487px'}} onClick={handleClickOnArea} onWheel={scrollHandler} onMouseMove={mouseMoveHandler} onMouseEnter={(event : React.MouseEvent) => setRect(event.currentTarget.getBoundingClientRect())}>
                     <DrawArea
                         setPoints={props.setPoints}
-                        left={0}
                         cursorPosition={cursorPosition}
                         scroll={scroll}
                         straight={usedShift}
@@ -422,7 +425,10 @@ function Draw(props : DrawProps) {
                         setSelectedPoint={setSelectedPoint}
                         selectedPoint={selectedPoint}
                         coverage={coverage}
+                        setWasMovedMouse={setWasMovedMouse}
+
                     />
+
                 </div>
                 <div className="Draw__Manage">
                     <div className="Draw__Manage__Wrapper">
@@ -448,7 +454,8 @@ function Draw(props : DrawProps) {
                 finished={finishedBuilding}
                 setSelectedPoint={setSelectedPoint}
                 selectedPoint={selectedPoint}
-                left={0}
+                setWasMovedMouse={setWasMovedMouse}
+
             />
             <div className="Draw__Hints">
                 <div className="Draw__Hints__Wrapper">
