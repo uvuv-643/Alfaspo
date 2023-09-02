@@ -33,6 +33,10 @@ class APIController extends Controller
             if ($pricePercent) {
                 $price->price *= $pricePercent->percent / 100;
                 $price->price_stringer *= $pricePercent->percent / 100;
+                $price->price_connector *= $pricePercent->percent / 100;
+                $price->price_anchor *= $pricePercent->percent / 100;
+                $price->price_screw *= $pricePercent->percent / 100;
+                $price->price_pin *= $pricePercent->percent / 100;
             }
             return response()->json($price);
         }

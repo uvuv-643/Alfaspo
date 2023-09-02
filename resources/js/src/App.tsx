@@ -29,7 +29,7 @@ import Contact from "./components/Contact";
 import axios from "axios";
 
 
-const ADMIN_URL = 'http://localhost:8000/api/price';
+const ADMIN_URL = 'https://alfaspo.uvuv643.online/api/price';
 
 function App() {
 
