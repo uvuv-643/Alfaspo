@@ -1,0 +1,412 @@
+.Draw {
+  user-select: none;
+  width: 900px;
+  height: 600px;
+  //border: 1px solid #000;
+  display: flex;
+  flex-direction: row;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  * {
+    font-family: $default-font;
+  }
+  position: relative;
+  &Area {
+    width: 100%;
+    &__CurrentLine {
+      position: absolute;
+    }
+    &__Coverage {
+      position: absolute;
+      margin-left: -900px;
+      margin-top: -600px;
+      z-index: 4;
+      polygon:hover {
+        fill: $dark;
+        cursor: pointer;
+      }
+    }
+    &__Lines {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      margin-top: -100%;
+      margin-left: -100%;
+      &--X, &--Y {
+        div {
+          position: absolute;
+          display: block;
+          z-index: 1;
+          content: '';
+        }
+      }
+      &--X > div {
+        top: 0;
+        height: 400%;
+        width: 2px;
+        background-image: linear-gradient($light-gray 33%, rgba(255,255,255,0) 0%);
+        background-position: right;
+        background-size: 2px 7px;
+        background-repeat: repeat-y;
+      }
+      &--Y > div {
+        left: 0;
+        width: 400%;
+        height: 2px;
+        background-image: linear-gradient(to right, $light-gray 33%, rgba(255,255,255,0) 0%);
+        background-position: bottom;
+        background-size: 7px 2px;
+        background-repeat: repeat-x;
+      }
+      &--X--Large, &--Y--Large {
+        & > div {
+          background: $light-gray;
+        }
+      }
+      &--X--Large > div {
+        width: 1px;
+      }
+      &--Y--Large > div {
+        height: 1px;
+      }
+    }
+    &__Axis {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      & > div {
+        position: absolute;
+        content: '';
+        display: block;
+        background: $medium-gray;
+        z-index: 2;
+      }
+      &--X {
+        width: 2px;
+        height: 300%;
+        top: -100%;
+        background: $medium-gray;
+      }
+      &--Y {
+        height: 2px;
+        width: 300%;
+        left: -100%;
+        background: $medium-gray;
+      }
+    }
+    &__Points {
+      position: absolute;
+    }
+    &__Figure {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    &__Point {
+      position: absolute;
+      z-index: 3;
+      width: 12px;
+      height: 12px;
+      display: block;
+      content: '';
+      margin-left: -6px;
+      margin-top: -6px;
+      background: $dark-gray;
+
+      &:last-child {
+        background: $dark;
+      }
+      &._selected {
+        background: #d19234;
+      }
+      &._finished {
+        cursor: pointer;
+        background: $dark;
+      }
+      &._inactive {
+        background: $medium-gray;
+      }
+    }
+  }
+  &__Manage {
+    position: absolute;
+    * {
+      font-family: "Gilroy", sans-serif;
+    }
+    top: 488px;
+    left: 0;
+    width: 674px;
+    height: 112px;
+    padding: 30px 30px 30px 30px;
+    &__Button {
+      font-size: 20px;
+      font-weight: 500;
+      padding: 13px 19px;
+      background: none;
+      border: 2px solid $dark;
+      margin-left: 5px;
+      margin-right: 5px;
+      color: $dark;
+      cursor: pointer;
+    }
+  }
+  &__Hints {
+    position: absolute;
+    z-index: 4;
+    width: 100%;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 30px 35px;
+    &--Created {
+      position: absolute;
+      z-index: 4;
+      width: 100%;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 30px;
+      & > div {
+        padding: 13px 20px;
+        font-size: 20px;
+        font-weight: 500;
+        white-space: nowrap;
+        width: auto;
+      }
+    }
+    &__Wrapper {
+      display: flex;
+      margin-right: -5px;
+      margin-left: -5px;
+    }
+    &--Back, &--Hint, &--Again, &--Back, &--Forward {
+      position: relative;
+      margin-left: 5px;
+      margin-right: 5px;
+      font-weight: 500;
+      font-size: 20px;
+      border: 2px solid $dark;
+      padding: 13px 19px;
+      background: #FFFFFF;
+      cursor: pointer;
+    }
+    &--Back, &--Back, &--Forward {
+      padding: 17px 19px;
+    }
+    &--Move {
+      width: auto;
+    }
+
+    &--Angle {
+      &__Main {
+        position: absolute;
+        z-index: 4;
+        padding: 20px 10px 20px 40px;
+        top: 30px;
+        left: 30px;
+        background: #FFF;
+        font-size: 14px;
+        font-weight: 500;
+        width: 225px;
+        line-height: 130%;
+        color: $dark;
+        border: 2px solid $light-gray;
+        span {
+          position: absolute;
+          font-size: 30px;
+          font-weight: 700;
+          color: $medium-gray;
+          top: 14px;
+          left: 15px;
+          line-height: 38px;
+        }
+      }
+      &__Wrapper {
+        position: absolute;
+        z-index: 4;
+        bottom: 0;
+        left: 143px;
+        border: 2px solid $light-gray;
+        background: #FFFFFF;
+        padding: 30px;
+        width: 652px;
+        display: flex;
+        justify-content: space-between;
+      }
+      &__Back {
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        & > div {
+          width: 52px;
+          height: 52px;
+          border: 2px solid $dark;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-right: 20px;
+        }
+        & > p {
+          width: 150px;
+          font-weight: 600;
+          color: $dark;
+          font-size: 22px;
+        }
+      }
+      &__Controls {
+        display: flex;
+      }
+      &__Again, &__Next {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: $dark;
+        font-weight: 500;
+        font-size: 20px;
+        cursor: pointer;
+        border: 2px solid $dark;
+      }
+      &__Again {
+        width: 116px;
+        background: #FFF;
+      }
+      &__Next {
+        width: 128px;
+        margin-left: 10px;
+        color: $medium-gray;
+        border: 2px solid $medium-gray;
+        img {
+          margin-left: 10px;
+        }
+        &._active {
+          background: $dark;
+          color: #FFF;
+          border-color: $dark;
+        }
+      }
+    }
+  }
+}
+
+.DrawLine {
+  &__AngleNumber {
+    position: absolute;
+    padding: 3px 0;
+    z-index: 4;
+    text-align: center;
+    min-width: 30px;
+    margin-left: -15px;
+    font-size: 10px;
+    color: #FFF;
+    background: $dark-gray;
+  }
+  &._inactive {
+    svg {
+      stroke: $medium-gray;
+    }
+  }
+  &._inactive &__Size {
+    background: $medium-gray;
+  }
+  &._active {
+    svg {
+      stroke: $dark;
+    }
+  }
+  &._last {
+    svg {
+      stroke: $dark;
+    }
+  }
+  &._support {
+    svg {
+      stroke-dasharray: 0 5 0;
+      stroke-width: 1px;
+      stroke: $medium-gray;
+    }
+  }
+  &._support &__Size {
+    font-weight: 400;
+    color: $medium-gray;
+    background: #FFF;
+    border: 1px dashed $medium-gray;
+  }
+  &__Point {
+    position: absolute;
+    z-index: 4;
+    width: 10px;
+    height: 10px;
+    background: $dark-gray;
+  }
+  &__Line, &__Angle {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    &._inactive {
+      svg {
+        stroke: red;
+      }
+    }
+    svg {
+      stroke: $dark-gray;
+      stroke-width: 2px;
+      width: 100%;
+      height: 100%;
+    }
+    &__Svg {
+      margin-left: -900px;
+      margin-top: -600px;
+      width: 2700px !important;
+      height: 1800px !important;
+    }
+  }
+  &__Angle--Quoter {
+    svg {
+      stroke-width: 1px;
+      stroke: $dark;
+      position: absolute;
+      &:nth-child(2) {
+        stroke-dasharray: 0 6 0;
+        stroke: $medium-gray;
+      }
+    }
+  }
+  &._active &__Size {
+    background: $dark;
+  }
+  &__Size {
+    position: absolute;
+    z-index: 4;
+    padding: 3px 5px;
+    background: $dark-gray;
+    color: #FFFFFF;
+    font-size: 10px;
+    &--Current {
+      background: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: $dark-gray;
+      background: #FFF;
+
+    }
+  }
+
+}
+
+
+.line-marker {
+  fill: $dark-gray;
+  stroke: none !important;
+}
+.line-arrow {
+  stroke: $dark-gray;
+}

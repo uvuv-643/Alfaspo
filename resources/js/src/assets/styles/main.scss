@@ -1,0 +1,113 @@
+@import 'variables.scss';
+
+@import 'global/Sidebar.scss';
+@import 'global/PageWrapper.scss';
+
+@import 'pages/Material.scss';
+@import 'pages/Dimensions.scss';
+@import 'pages/Margin.scss';
+@import 'pages/Color.scss';
+@import 'pages/Size.scss';
+@import 'pages/Draw.scss';
+@import 'pages/Price.scss';
+@import 'pages/Contact.scss';
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+* {
+  box-sizing: border-box;
+}
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+}
+.App {
+  text-align: left;
+}
+.LargeCheckbox {
+  width: 52px;
+  height: 52px;
+  border: 2px solid $dark;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &._active {
+    background: $dark;
+  }
+}
+
+.Checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #AAAAAA;
+  position: relative;
+  &__Content {
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    background: $dark;
+    display: none;
+  }
+  &._active {
+    border-color: $dark;
+  }
+  &._active &__Content {
+    display: block;
+  }
+}
+
+.Buttons__Wrapper {
+  position: absolute;
+  bottom: 30px;
+  width: 100%;
+  padding-left: 30px;
+  padding-right: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 30px;
+  border-top: 2px solid $light-gray;
+  button {
+    background: none;
+    border: 2px solid $dark;
+    width: 165px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 400;
+    color: $dark;
+    cursor: pointer;
+    height: 52px;
+    svg {
+      margin-right: 10px;
+      stroke: $dark;
+    }
+    &:last-child {
+      background: $dark;
+      color: white;
+      svg {
+        stroke: white;
+        margin-left: 10px;
+        margin-right: 0;
+      }
+    }
+  }
+  &--Price {
+    div {
+      display: flex;
+      & > button:first-child {
+        width: 185px;
+        margin-right: 10px;
+      }
+      & > button:last-child {
+        width: 100px;
+        margin-right: 10px;
+      }
+    }
+  }
+}

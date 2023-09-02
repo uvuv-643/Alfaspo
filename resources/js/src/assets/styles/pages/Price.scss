@@ -1,0 +1,141 @@
+.Price {
+  position: relative;
+  height: 100%;
+  width: 673px;
+  &__Left, &__Right {
+    padding-left: 30px;
+    padding-top: 30px;
+    padding-right: 30px;
+    height: 100%;
+  }
+  &__Left {
+    border-right: 2px solid $light-gray;
+    padding-bottom: 32px;
+  }
+  &__Chosen, &__Reqs {
+    h3 {
+      width: 164px;
+      font-size: 22px;
+      font-style: normal;
+      font-weight: 600;
+      margin-bottom: 19px;
+    }
+    p {
+      margin-bottom: 5px;
+      color: $dark-gray;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+  &__Row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  &__Left {
+    width: 337px;
+  }
+  &__Right {
+    width: 335px;
+  }
+  hr {
+    width: calc(100% + 60px);
+    height: 2px;
+    background: $light-gray;
+    border: none;
+    margin-left: -30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+  &__Colors {
+    &__Change {
+      font-size: 12px;
+      text-decoration: underline;
+      color: $medium-gray;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    &__Wrapper {
+      display: flex;
+      & > div {
+        width: 50%;
+        flex: 0 0 50%;
+      }
+    }
+    &__Item {
+      h5 {
+        font-weight: 500;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+    }
+    &__Color {
+      position: relative;
+      width: 100%;
+      height: 73px;
+      &._active {
+        height: 45px;
+      }
+      &__Bg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        span {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+        img {
+          object-fit: cover;
+          width: 100%;
+          height: 100%;
+        }
+      }
+      &__Title {
+        position: absolute;
+        font-size: 14px;
+        font-weight: 500;
+        bottom: 10px;
+        left: 10px;
+        z-index: 5;
+      }
+    }
+  }
+  &__Final {
+    h2 {
+      font-size: 22px;
+      font-style: normal;
+      font-weight: 600;
+    }
+    p {
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      color: $dark-gray;
+    }
+  }
+  &__Notation {
+    margin-top: 27px;
+    width: 147px;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    color: $dark-gray;
+  }
+  &__Rooms {
+    margin-bottom: 20px;
+    display: flex;
+    &__Item {
+      margin-right: 10px;
+      text-decoration: underline;
+      cursor: pointer;
+      color: $medium-gray;
+      &._active {
+        color: $dark;
+      }
+    }
+  }
+}

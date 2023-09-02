@@ -1,0 +1,146 @@
+@php use Illuminate\Support\Str; @endphp
+
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Редагувати елемент') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-xl">
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger mb-3">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('price.update', $price) }}" method="post">
+                        @csrf
+                        @method('put')
+
+                        <section class="space-y-6">
+
+                            <input type="hidden" name="material_id" value="{{ $price->material->id }}"/>
+
+                            <header>
+                                <h2 class="text-lg font-medium text-gray-900">
+                                    {{ $price->material->title }}
+                                </h2>
+                            </header>
+
+                            <x-input-label for="width" value="{{ __('Ширина') }}"/>
+                            <x-text-input
+                                id="width"
+                                name="width"
+                                type="text"
+                                class="mt-1 block w-full"
+                                placeholder="{{ __('Ширина') }}"
+                                value="{{ old('width', $price->width) }}"
+                            />
+
+                            <x-input-label for="height" value="{{ __('Висота') }}"/>
+                            <x-text-input
+                                id="height"
+                                name="height"
+                                type="text"
+                                class="mt-1 block w-full"
+                                placeholder="{{ __('Висота') }}"
+                                value="{{ old('height', $price->height) }}"
+                            />
+
+                            @if (Str::contains($price->material->title, 'повсть', true))
+                                <x-input-label for="margin" value="{{ __('Вiдстань (лише для акустичноi повстi') }}"/>
+                                <x-text-input
+                                    id="margin"
+                                    name="margin"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    placeholder="{{ __('Вiдстань') }}"
+                                    value="{{ old('margin', $price->margin) }}"
+                                />
+                            @endif
+
+                            <x-input-label for="color" value="{{ __('Колiр') }}"/>
+                            <select
+                                class="mt-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
+                                id="color" name="color_id">
+                                @foreach ($colors as $color)
+                                    <option value="{{ $color->id }}" @if ($price->color->id == $color->id) selected @endif>{{ $color->title }}</option>
+                                @endforeach
+                            </select>
+
+
+                            @php
+                                $priceElements = [
+                                    ['key' => 'price', 'label' => 'Вартiсть панель'],
+                                    ['key' => 'price_stringer', 'label' => 'Вартiсть стрiнгер'],
+                                    ['key' => 'price_connector', 'label' => "Вартiсть з`єднувач"],
+                                    ['key' => 'price_anchor', 'label' => 'Вартiсть анкер'],
+                                    ['key' => 'price_pin', 'label' => 'Вартiсть шпилька'],
+                                    ['key' => 'price_screw', 'label' => 'Вартiсть гайка'],
+                                ];
+                            @endphp
+                            @foreach($priceElements as $element)
+                                <x-input-label for="{{ $element['key'] }}" value="{{ $element['label'] }}"/>
+                                <x-text-input
+                                    id="{{ $element['key'] }}"
+                                    name="{{ $element['key'] }}"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    placeholder="{{ __('0.0') }}"
+                                    value="{{ old($element['key'], $price[$element['key']]) }}"
+                                />
+                            @endforeach
+
+                            @if (!Str::contains($price->material->title, 'повсть', true))
+                                @php
+                                    $weightElements = [
+                                        ['key' => 'weight', 'label' => 'Вага панель'],
+                                        ['key' => 'weight_stringer', 'label' => 'Вага стрiнгер'],
+                                        ['key' => 'weight_connector', 'label' => "Вага з`єднувач"],
+                                    ];
+                                @endphp
+                                @foreach($weightElements as $element)
+                                    <x-input-label for="{{ $element['key'] }}" value="{{ $element['label'] }}"/>
+                                    <x-text-input
+                                        id="{{ $element['key'] }}"
+                                        name="{{ $element['key'] }}"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        placeholder="{{ __('0.0') }}"
+                                        value="{{ old($element['key'], $price[$element['key']]) }}"
+                                    />
+                                @endforeach
+                            @else
+                                <x-input-label for="weight" value="Вага за м^2"/>
+                                <x-text-input
+                                    id="weight"
+                                    name="weight"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    placeholder="{{ __('0.0') }}"
+                                    value="{{ old('weight', $price->weight) }}"
+                                />
+                            @endif
+
+                            <div class="mt-4 mb-5">
+                                <button class="btn btn-success">Оновити</button>
+                            </div>
+
+                        </section>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+

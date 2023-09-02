@@ -1,0 +1,16 @@
+{
+    "You can rearrange the order of the items in this list using a drag and drop action.": "Ви можете змінити порядок елементів у цьому списку, використовуючи дію перетягування.",
+    "Yes": "Так",
+    "No": "Ні",
+    "Number of rows per page": "Кількість рядків на сторінці",
+    "Loading in progress...": "Завантаження...",
+    "No results were found.": "Результатів не знайдено",
+    "Create": "Створити",
+    "Add": "Додати",
+    "Are you sure you want to execute the action :action on the line #:primary?": "Ви впевнені що хочете виконати дію :action над рядком №:primary",
+    "Showing results <b>:start</b> to <b>:stop</b> on <b>:total</b>": "Показано результати від <b>:start</b> до <b >:stop</b> з <b>:total</b>",
+    "Destroy": "Видалити",
+    "Edit": "Змінити",
+    "Order": "Порядок на сайті",
+    "Actions": "Дії"
+}

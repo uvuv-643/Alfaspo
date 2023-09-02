@@ -1,0 +1,145 @@
+.Sidebar {
+  border-right: 2px solid $light-gray;
+  height: 100%;
+  padding: 30px;
+  position: relative;
+  background: $light-gray;
+  &--White {
+    background: white;
+  }
+  &--White &__Item {
+    &:nth-child(4):after {
+      display: none;
+    }
+  }
+  &__Item {
+    margin-bottom: 24px;
+    position: relative;
+    &:not(&:last-child):after {
+      content: '';
+      width: 2px;
+      height: 14px;
+      margin-top: 5px;
+      margin-left: 3px;
+      background: $medium-gray;
+      position: absolute;
+    }
+    &--done {
+      &:not(&:last-child):after {
+        background: $dark;
+      }
+    }
+    &__Wrapper {
+      display: flex;
+      align-items: center;
+    }
+    h4 {
+      color: $dark;
+      font-weight: 700;
+      font-size: 30px;
+      line-height: 36px;
+      margin-left: -5px;
+      padding-top: 5px;
+    }
+    &__Image {
+      height: 20px;
+      margin-right: 10px;
+    }
+    &__Content {
+      font-weight: 500;
+      font-size: 14px;
+      color: $dark-gray;
+      span {
+        color: $dark;
+      }
+    }
+    &--Draw {
+      margin-left: -30px;
+      margin-right: -30px;
+      padding: 30px;
+      border-top: 1px solid $light-gray;
+      border-bottom: 1px solid $light-gray;
+      h3 {
+        font-size: 22px;
+        font-weight: 600;
+        width: 130px;
+        margin-bottom: 18px;
+      }
+      &__Item {
+        display: inline-block;
+        width: 50%;
+        margin-top: 10px;
+        cursor: pointer;
+        &:nth-child(1),
+        &:nth-child(2) {
+          margin-top: 0;
+        }
+        &._active > div p {
+          color: $dark;
+        }
+        & > div {
+          display: flex;
+          align-items: center;
+          .Checkbox {
+            flex: 0 0 20px;
+          }
+          p {
+            margin-left: 3px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 130%;
+            color: $dark-gray
+          }
+        }
+      }
+    }
+    &--Square {
+      padding-top: 20px;
+      p {
+        color: $dark-gray;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 130%;
+        span {
+          color: $dark;
+        }
+      }
+    }
+  }
+  &__Button {
+    position: absolute;
+    width: calc(100% - 60px);
+    bottom: 30px;
+    display: flex;
+    align-items: center;
+    button {
+      height: 52px;
+      width: 100%;
+      display: flex;
+      cursor: pointer;
+      font-size: 20px;
+      padding-top: 13px;
+      padding-bottom: 13px;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid $dark;
+      color: $dark;
+      background: none;
+      flex: 0 0 52px;
+      margin-right: 10px;
+      max-width: 52px;
+      &._active {
+        width: 100%;
+        max-width: 100%;
+        flex: auto;
+        margin-right: 0;
+        color: $light-gray;
+        background: $dark;
+        img {
+          margin-left: 10px;
+        }
+      }
+    }
+  }
+
+}

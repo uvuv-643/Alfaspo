@@ -1,0 +1,115 @@
+.Material {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+.MaterialItem {
+  flex: 0 0 33.3%;
+  width: 33.3%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  &__Image {
+    height: 223px;
+    position: relative;
+    border: 1px solid $light-gray;
+    border-bottom: 2px solid $light-gray;
+    &__Actual {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: 0.3s;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    &__Title {
+      position: absolute;
+      padding-left: 29px;
+      padding-right: 29px;
+      bottom: 30px;
+      h5 {
+        font-weight: 600;
+        font-size: 22px;
+        padding-right: 15px;
+        line-height: 26px;
+        margin-bottom: 10px;
+        color: $dark;
+      }
+      p {
+        font-size: 12px;
+        line-height: 120%;
+        color: $medium-gray;
+      }
+    }
+  }
+  &__Checkbox {
+    position: absolute;
+    left: 0;
+    top: 223px;
+    cursor: pointer;
+  }
+  &__List {
+    margin-top: 30px;
+    ul {
+      padding-left: 30px;
+      padding-right: 30px;
+      margin: 0;
+      li {
+        list-style: none;
+        margin-bottom: 10px;
+        line-height: 130%;
+        font-size: 14px;
+        color: $dark-gray;
+      }
+    }
+  }
+  &__Button {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    padding: 13px 43px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: $medium-gray;
+    border: 2px solid $medium-gray;
+    transition: 0.3s;
+    svg {
+      stroke: $medium-gray;
+      margin-left: 8px;
+    }
+  }
+  &._active &__Image, &:hover &__Image {
+    border: 0;
+  }
+  &:hover &__Button {
+    background: $dark;
+    color: white;
+    border-color: $dark;
+    svg {
+      stroke: white;
+    }
+  }
+  //&._active &__Image__Actual,
+  &:hover &__Image__Actual {
+    opacity: 1;
+  }
+  //&._active &__Image__Title *,
+  &:hover &__Image__Title * {
+    color: $light-gray;
+  }
+  &._active &__Image__Title, &:hover &__Image__Title {
+    bottom: 32px;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}
