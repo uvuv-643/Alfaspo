@@ -36,7 +36,7 @@
                                 </h2>
                             </header>
 
-                            <x-input-label for="width" value="{{ __('Ширина') }}"/>
+                            <x-input-label for="width" value="{{ __('Ширина (мм)') }}"/>
                             <x-text-input
                                 id="width"
                                 name="width"
@@ -46,7 +46,7 @@
                                 value="{{ old('width', $price->width) }}"
                             />
 
-                            <x-input-label for="height" value="{{ __('Висота') }}"/>
+                            <x-input-label for="height" value="{{ __('Висота (мм)') }}"/>
                             <x-text-input
                                 id="height"
                                 name="height"
@@ -57,7 +57,7 @@
                             />
 
                             @if (Str::contains($price->material->title, 'повсть', true))
-                                <x-input-label for="margin" value="{{ __('Вiдстань (лише для акустичноi повстi') }}"/>
+                                <x-input-label for="margin" value="{{ __('Вiдстань (лише для акустичноi повстi), мм') }}"/>
                                 <x-text-input
                                     id="margin"
                                     name="margin"
@@ -80,12 +80,12 @@
 
                             @php
                                 $priceElements = [
-                                    ['key' => 'price', 'label' => 'Вартiсть панель'],
-                                    ['key' => 'price_stringer', 'label' => 'Вартiсть стрiнгер'],
-                                    ['key' => 'price_connector', 'label' => "Вартiсть з`єднувач"],
-                                    ['key' => 'price_anchor', 'label' => 'Вартiсть анкер'],
-                                    ['key' => 'price_pin', 'label' => 'Вартiсть шпилька'],
-                                    ['key' => 'price_screw', 'label' => 'Вартiсть гайка'],
+                                    ['key' => 'price', 'label' => 'Вартiсть панель (грн)'],
+                                    ['key' => 'price_stringer', 'label' => 'Вартiсть стрiнгер (грн)'],
+                                    ['key' => 'price_connector', 'label' => "Вартiсть з`єднувач (грн)"],
+                                    ['key' => 'price_anchor', 'label' => 'Вартiсть анкер (грн)'],
+                                    ['key' => 'price_pin', 'label' => 'Вартiсть шпилька (грн)'],
+                                    ['key' => 'price_screw', 'label' => 'Вартiсть гайка (грн)'],
                                 ];
                             @endphp
                             @foreach($priceElements as $element)
@@ -103,9 +103,9 @@
                             @if (!Str::contains($price->material->title, 'повсть', true))
                                 @php
                                     $weightElements = [
-                                        ['key' => 'weight', 'label' => 'Вага панель'],
-                                        ['key' => 'weight_stringer', 'label' => 'Вага стрiнгер'],
-                                        ['key' => 'weight_connector', 'label' => "Вага з`єднувач"],
+                                        ['key' => 'weight', 'label' => 'Вага панель (кг)'],
+                                        ['key' => 'weight_stringer', 'label' => 'Вага стрiнгер (кг)'],
+                                        ['key' => 'weight_connector', 'label' => "Вага з`єднувач (кг)"],
                                     ];
                                 @endphp
                                 @foreach($weightElements as $element)

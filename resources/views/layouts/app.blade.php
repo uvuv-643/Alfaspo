@@ -52,5 +52,26 @@
             });
         </script>
 
+        <script>
+            // Get all forms on the page
+            var forms = document.querySelectorAll("form");
+
+            // Loop through each form and attach a submit event listener
+            forms.forEach(function (form) {
+                form.addEventListener("submit", function (event) {
+                    event.preventDefault(); // Prevent the form from submitting normally
+
+                    // Replace commas with dots in all input fields within this form
+                    var inputs = form.querySelectorAll("input[type='text']");
+                    inputs.forEach(function (input) {
+                        input.value = input.value.replace(/,/g, '.');
+                    });
+
+                    // Now submit the form
+                    form.submit();
+                });
+            });
+        </script>
+
     </body>
 </html>
