@@ -13,6 +13,12 @@ class APIController extends Controller
 
     public function price(Request $request) : JsonResponse
     {
+        dd([
+            trim($request->material),
+            trim($request->color),
+            $request->width,
+            $request->height
+        ]);
         $price = Price::with(['material', 'color'])
             ->whereHas('material', function ($query) use ($request) {
                 $query->where('title', trim($request->material));
