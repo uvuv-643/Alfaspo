@@ -1,8 +1,9 @@
 @php use Illuminate\Support\Str; @endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Додати новий елемент') }}
+            {{ __('Редагувати елемент') }}
         </h2>
     </x-slot>
 
@@ -21,66 +22,36 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('price.panels.store') }}" method="post">
+                    <form action="{{ route('price.stringers.update', $price) }}" method="post">
                         @csrf
+                        @method('put')
 
                         <section class="space-y-6">
 
+                            <input type="hidden" name="material_id" value="{{ $price->material->id }}"/>
+
                             <header>
                                 <h2 class="text-lg font-medium text-gray-900">
-                                    {{ $material->title }}
+                                    {{ $price->material->title }}
                                 </h2>
                             </header>
 
-                            <input type="hidden" name="material_id" value="{{ $material->id }}"/>
 
-                            <x-input-label for="width" value="{{ __('Ширина (мм)') }}"/>
-                            <x-text-input
-                                id="width"
-                                name="width"
-                                type="text"
-                                class="mt-1 block w-full"
-                                placeholder="{{ __('Ширина') }}"
-                                value="{{ old('width') }}"
-                            />
-
-                            <x-input-label for="height" value="{{ __('Висота (мм)') }}"/>
-                            <x-text-input
-                                id="height"
-                                name="height"
-                                type="text"
-                                class="mt-1 block w-full"
-                                placeholder="{{ __('Висота') }}"
-                                value="{{ old('height') }}"
-                            />
-
-                            @if (Str::contains($material->title, 'повсть', true))
-                                <x-input-label for="margin" value="{{ __('Вiдстань (лише для акустичноi повстi), мм') }}"/>
-                                <x-text-input
-                                    id="margin"
-                                    name="margin"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    placeholder="{{ __('Вiдстань') }}"
-                                    value="{{ old('margin') }}"
-                                />
-                            @endif
-
-                            <x-input-label for="color" value="{{ __('Колiр') }}"/>
+                            <x-input-label for="color" value="{{ __('Колiр стрiнгера') }}"/>
                             <select
                                 class="mt-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full"
                                 id="color" name="color_id">
                                 @foreach ($colors as $color)
-                                    <option value="{{ $color->id }}">{{ $color->title }}</option>
+                                    <option value="{{ $color->id }}" @if ($price->color->id == $color->id) selected @endif>{{ $color->title }}</option>
                                 @endforeach
                             </select>
 
 
                             @php
                                 $priceElements = [
-                                    ['key' => 'price', 'label' => 'Вартiсть панель (грн)'],
+//                                    ['key' => 'price', 'label' => 'Вартiсть панель (грн)'],
+                                    ['key' => 'price_stringer', 'label' => 'Вартiсть стрiнгер (грн)'],
 //                                    ['key' => 'price_connector', 'label' => "Вартiсть з`єднувач (грн)"],
-//                                    ['key' => 'price_stringer', 'label' => 'Вартiсть стрiнгер (грн)'],
 //                                    ['key' => 'price_anchor', 'label' => 'Вартiсть анкер (грн)'],
 //                                    ['key' => 'price_pin', 'label' => 'Вартiсть шпилька (грн)'],
 //                                    ['key' => 'price_screw', 'label' => 'Вартiсть гайка (грн)'],
@@ -94,15 +65,14 @@
                                     type="text"
                                     class="mt-1 block w-full"
                                     placeholder="{{ __('0.0') }}"
-                                    value="{{ old($element['key'], 0) }}"
+                                    value="{{ old($element['key'], $price[$element['key']]) }}"
                                 />
                             @endforeach
 
-                            @if (!Str::contains($material->title, 'повсть', true))
                                 @php
                                     $weightElements = [
-                                        ['key' => 'weight', 'label' => 'Вага панель (кг)'],
-//                                        ['key' => 'weight_stringer', 'label' => 'Вага стрiнгер (кг)'],
+//                                        ['key' => 'weight', 'label' => 'Вага панель (кг)'],
+                                        ['key' => 'weight_stringer', 'label' => 'Вага стрiнгер (кг)'],
 //                                        ['key' => 'weight_connector', 'label' => "Вага з`єднувач (кг)"],
                                     ];
                                 @endphp
@@ -114,23 +84,12 @@
                                         type="text"
                                         class="mt-1 block w-full"
                                         placeholder="{{ __('0.0') }}"
-                                        value="{{ old($element['key'], 0) }}"
+                                        value="{{ old($element['key'], $price[$element['key']]) }}"
                                     />
                                 @endforeach
-                            @else
-                                <x-input-label for="weight" value="Вага за м^2"/>
-                                <x-text-input
-                                    id="weight"
-                                    name="weight"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    placeholder="{{ __('0.0') }}"
-                                    value="{{ old('weight', 0) }}"
-                                />
-                            @endif
 
                             <div class="mt-4 mb-5">
-                                <button class="btn btn-success">Додати</button>
+                                <button class="btn btn-success">Оновити</button>
                             </div>
 
                         </section>

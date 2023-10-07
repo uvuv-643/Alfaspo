@@ -22,7 +22,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('price.update', $price) }}" method="post">
+                    <form action="{{ route('price.panels.update', $price) }}" method="post">
                         @csrf
                         @method('put')
 

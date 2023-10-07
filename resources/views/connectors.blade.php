@@ -12,23 +12,23 @@
 
                     <div class="d-flex">
                         <div>
-                            <a target="_blank" href="{{ route('price.create', $materials[0]->id) }}" class="btn btn-success" title="Войлок">
+                            <a target="_blank" href="{{ route('price.connectors.create', $materials[0]->id) }}" class="btn btn-success" title="Войлок">
                                 + {{ $materials[0]->title }}
                             </a>
                         </div>
                         <div class="ml-4">
-                            <a target="_blank" href="{{ route('price.create', $materials[1]->id) }}" class="btn btn-success" title="Войлок">
+                            <a target="_blank" href="{{ route('price.connectors.create', $materials[1]->id) }}" class="btn btn-success" title="Войлок">
                                 + {{ $materials[1]->title }}
                             </a>
                         </div>
                         <div class="ml-4">
-                            <a target="_blank" href="{{ route('price.create', $materials[2]->id) }}" class="btn btn-success" title="Войлок">
+                            <a target="_blank" href="{{ route('price.connectors.create', $materials[2]->id) }}" class="btn btn-success" title="Войлок">
                                 + {{ $materials[2]->title }}
                             </a>
                         </div>
                     </div>
 
-                    <livewire:table :config="App\Tables\PriceTable::class"/>
+                    <livewire:table :config="App\Tables\PriceConnectorsTable::class"/>
 
                 </div>
             </div>

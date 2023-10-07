@@ -5,21 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Price extends Model
+class PriceStringer extends Model
 {
     use HasFactory;
 
     protected $guarded = [];
 
     protected $fillable = [
-        'width', 'height', 'margin', 'material_id', 'color_id', 'price', 'weight'
+        'color_id', 'price_stringer', 'weight_stringer',
     ];
 
     protected $attributes = [
-        'price' => 0,
-        'weight' => 0,
+        'price_stringer' => 0,
+        'weight_stringer' => 0,
     ];
 
     public function color() : BelongsTo
@@ -31,5 +30,4 @@ class Price extends Model
     {
         return $this->belongsTo(Material::class);
     }
-
 }

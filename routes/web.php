@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\PriceConnectorsController;
 use App\Http\Controllers\PriceController;
 use App\Http\Controllers\PricePercentController;
+use App\Http\Controllers\PriceStringersController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,9 +23,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/panels', function () {
+    return view('panels');
+})->middleware(['auth', 'verified'])->name('panels');
+
+Route::get('/stringers', function () {
+    return view('stringers');
+})->middleware(['auth', 'verified'])->name('stringers');
+
+Route::get('/connectors', function () {
+    return view('connectors');
+})->middleware(['auth', 'verified'])->name('connectors');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -31,8 +41,15 @@ Route::middleware('auth')->group(function () {
 //    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/price/create/{id}', [PriceController::class, 'create'])->name('price.create');
-Route::resource('/price', PriceController::class)->except(['index', 'show', 'create', 'delete']);
+Route::group(['prefix' => 'price', 'as' => 'price.'], function () {
+    Route::get('/price/panels/create/{id}', [PriceController::class, 'create'])->name('panels.create');
+    Route::resource('/panels', PriceController::class)->except(['index', 'show', 'create', 'delete']);
+    Route::get('/price/stringers/create/{id}', [PriceStringersController::class, 'create'])->name('stringers.create');
+    Route::resource('/stringers', PriceStringersController::class)->except(['index', 'show', 'create', 'delete']);
+    Route::get('/price/connectors/create/{id}', [PriceConnectorsController::class, 'create'])->name('connectors.create');
+    Route::resource('/connectors', PriceConnectorsController::class)->except(['index', 'show', 'create', 'delete']);
+});
+
 Route::resource('/percent', PricePercentController::class)->except(['show', 'create', 'delete', 'store']);
 
 
