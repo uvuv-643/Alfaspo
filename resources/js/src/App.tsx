@@ -173,7 +173,6 @@ function App() {
         let totalPriceForAllRooms = rooms.reduce((prev, curr) => {
             return prev + curr.price
         }, 0)
-        console.log(rooms, totalPriceForAllRooms)
         let selectedValuesClone = {...selectedValues}
         selectedValuesClone[PAGES.PRICE] = totalPriceForAllRooms.toFixed(2) + ' грн'
         setSelectedValues(selectedValuesClone)

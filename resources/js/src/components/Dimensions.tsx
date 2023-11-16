@@ -5,7 +5,7 @@ import HeightItem from "./Dimensions/HeightItem";
 import MaterialElementInterface from "../interfaces/MaterialElementInterface";
 import WidthImage from "./Dimensions/WidthImage";
 import HeightImage from "./Dimensions/HeightImage";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 interface DimensionsProps {
     selectedMaterial: MaterialElementInterface | null,
@@ -22,6 +22,14 @@ function Dimensions(props: DimensionsProps) {
     const [isWidthChosen, setIsWidthChosen] = useState<boolean>(false)
 
     const navigate = useNavigate()
+    const location = useLocation();
+
+    const queryParams = new URLSearchParams(location.search);
+    const isHeight = !!queryParams.get('height')
+
+    useEffect(() => {
+        setIsWidthChosen(!!queryParams.get('height'))
+    }, []);
 
     const handleBack = () => {
         if (isWidthChosen) {

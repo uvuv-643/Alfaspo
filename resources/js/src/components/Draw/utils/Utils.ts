@@ -17,7 +17,7 @@ export interface WindowLineInterface {
     second: WindowPointInterface,
 }
 
-const PANEL_NEAREST_DISTANCE = 300
+const PANEL_NEAREST_DISTANCE = 250
 const PANEL_INSIDE_DISTANCE = 1000
 const STRINGER_SMALL_SIZE = 65
 
@@ -112,6 +112,11 @@ function calculateAngle(line : WindowLineInterface): number {
     return (angleRad * (180 / Math.PI) + 180) % 180;
 }
 
+export
+function distance(point1 : PointInterface, point2 : PointInterface) {
+    return Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2))
+}
+
 
 export function windowPointToReal(point: WindowPointInterface, P : number): RealPointInterface {
     return {
@@ -178,6 +183,24 @@ export function calculateDistance(point: PointInterface, lines: WindowLineInterf
 
 }
 
+function minBags(arr: number[], k: number): number {
+    arr.sort((a, b) => b - a);
+    let bags = 0;
+    let currentSum = 0;
+    for (const num of arr) {
+        if (currentSum + num <= k) {
+            currentSum += num;
+        } else {
+            bags++;
+            currentSum = num;
+        }
+    }
+    if (currentSum > 0) {
+        bags++;
+    }
+    return bags;
+}
+
 // export function findNearestCellPoint(point : WindowPointInterface, cellSize : number) {
 //     return {
 //         x: Math.round(point.x / cellSize) * cellSize,
@@ -240,8 +263,8 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
 
     angle = Math.round(angle * 180 / Math.PI) * Math.PI / 180
 
-    const X_STEP = 5
-    const Y_STEP = 5
+    const X_STEP = 2
+    const Y_STEP = 2
 
     // поворачиваем фигуру так, чтобы панели лежали вдоль OX
     let rotatedPoints: RealPointInterface[] = points.map((point: RealPointInterface) => {
@@ -267,9 +290,9 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
     let panels : number[][][] = []
     for (let y = minY + margin; y < maxY + width; y += width + margin) {
         let currentPlank : boolean[] = []
-        for (let x_0 = minX; x_0 < maxX; x_0 += X_STEP) {
+        for (let x_0 = minX; x_0 < maxX + X_STEP; x_0 += X_STEP) {
             let isGoodLine : boolean = true
-            for (let y_0 = y; y_0 < y + width; y_0 += Y_STEP) {
+            for (let y_0 = y; y_0 < y + width + Y_STEP; y_0 += Y_STEP) {
                 if (!isPointInsidePolygonReal({
                     x : x_0,
                     y : y_0
@@ -298,19 +321,19 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
                     lastOpened = i
                 } else {
                     if ((i - lastOpened) * X_STEP > currentPanelLimit) {
-                        rects.push([lastOpened * X_STEP + 1, i * X_STEP - 1])
+                        rects.push([lastOpened * X_STEP, i * X_STEP])
                         lastOpened = i
                     }
                 }
             } else {
                 if (lastOpened) {
-                    rects.push([lastOpened * X_STEP + 1, i * X_STEP - 1])
+                    rects.push([lastOpened * X_STEP, i * X_STEP])
                     lastOpened = undefined
                 }
             }
         }
         if (lastOpened) {
-            rects.push([lastOpened * X_STEP + 1 , currentPlank.length * X_STEP - 1])
+            rects.push([lastOpened * X_STEP , currentPlank.length * X_STEP])
             lastOpened = undefined
         }
         panels.push(rects)
@@ -530,7 +553,7 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
     }
     min_X = Math.floor(min_X);
     max_X = Math.ceil(max_X);
-    const target_answer: { x: number; rows: number[] }[] = [];
+    const targetAnswer: { x: number; rows: number[] }[] = [];
     for (let x = min_X; x <= max_X + STRINGER_SMALL_SIZE; x += STRINGER_SMALL_SIZE) {
         const current_cx_answer: number[] = [];
         for (const [c_index, xx] of Object.entries(all_stringers_by_rows)) {
@@ -542,23 +565,23 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         }
         if (current_cx_answer.length) {
             const target_list = Array.from(new Set(current_cx_answer)).sort((a, b) => parseInt(a.toString()) - parseInt(b.toString()));
-            target_answer.push({ x, rows: target_list });
+            targetAnswer.push({ x, rows: target_list });
         }
     }
 
-    for (let i = 0; i < target_answer.length; i++) {
-        const rows = target_answer[i].rows;
+    for (let i = 0; i < targetAnswer.length; i++) {
+        const rows = targetAnswer[i].rows;
         for (let j = 0; j < rows.length - 1; j++) {
             if (rows[j + 1] - rows[j] !== 1) {
-                target_answer.push({ x: target_answer[i].x, rows: rows.slice(j + 1) });
+                targetAnswer.push({ x: targetAnswer[i].x, rows: rows.slice(j + 1) });
                 rows.splice(j + 1);
                 break;
             }
         }
     }
 
-    for (let index = 0; index < target_answer.length; index++) {
-        const element = target_answer[index];
+    for (let index = 0; index < targetAnswer.length; index++) {
+        const element = targetAnswer[index];
         const x = element.x;
         let rows = element.rows;
         if (rows.length === 2) {
@@ -583,7 +606,7 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
                 rows.push(rows[0] + 1);
             }
         }
-        target_answer[index].rows = rows;
+        targetAnswer[index].rows = rows;
     }
 
     let currentStringersLimit = STEEL_MAX_STRINGER;
@@ -593,11 +616,11 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
         currentStringersLimit = ACOUSTIC_MAX_STRINGER
     }
 
-    for (let i = 0; i < target_answer.length; i++) {
-        const rows = target_answer[i].rows;
+    for (let i = 0; i < targetAnswer.length; i++) {
+        const rows = targetAnswer[i].rows;
         for (let j = 0; j < rows.length - 2; j++) {
             if (j * (margin + width) > currentStringersLimit) {
-                target_answer.push({ x: target_answer[i].x + 100, rows: rows.slice(j + 1 - Math.ceil(100 / (margin + width))) });
+                targetAnswer.push({ x: targetAnswer[i].x + 100, rows: rows.slice(j + 1 - Math.ceil(100 / (margin + width))) });
                 rows.splice(j + 1);
                 break;
             }
@@ -605,24 +628,48 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
     }
 
     let stringerPoints : any[] = []
-    for (let i = 0; i < target_answer.length; i++) {
-        const leftBorder = target_answer[i].rows[0]
-        const rightBorder = target_answer[i].rows[target_answer[i].rows.length - 1]
-        const pointsCount = Math.max(2, ((rightBorder - leftBorder + 1) * (width + margin) - 2 * PANEL_NEAREST_DISTANCE) / PANEL_INSIDE_DISTANCE)
-        if (pointsCount === 2 && rightBorder - leftBorder < 6) {
-            if (rightBorder - leftBorder !== 2) {
-                stringerPoints.push({'x': target_answer[i].x, 'row': leftBorder + 1})
-                stringerPoints.push({'x': target_answer[i].x, 'row': rightBorder - 1})
-            } else {
-                stringerPoints.push({'x': target_answer[i].x, 'row': leftBorder})
-                stringerPoints.push({'x': target_answer[i].x, 'row': rightBorder})
+    for (let i = 0; i < targetAnswer.length; i++) {
+        const leftBorder = targetAnswer[i].rows[0]
+        const rightBorder = targetAnswer[i].rows[targetAnswer[i].rows.length - 1]
+        const step = width + margin
+        const totalLengthMM = (rightBorder - leftBorder) * step + width
+
+        // если есть возможность, делаем на максимальном удалении точки от краевых
+        // выбираем расположение ближе к началу, если это минимальная расстановка
+        let points1 = [];
+        let points2 = [];
+        for (let i = PANEL_NEAREST_DISTANCE + PANEL_INSIDE_DISTANCE / 2; i < totalLengthMM - PANEL_NEAREST_DISTANCE; i += PANEL_INSIDE_DISTANCE) {
+            points1.push(i)
+        }
+        for (let i = PANEL_NEAREST_DISTANCE + PANEL_INSIDE_DISTANCE; i < totalLengthMM - PANEL_NEAREST_DISTANCE; i += PANEL_INSIDE_DISTANCE) {
+            points2.push(i)
+        }
+        let points = points2
+        if (points1.length <= points2.length) {
+            points = points1
+        }
+
+        if (totalLengthMM > 2 * PANEL_NEAREST_DISTANCE + width + margin) {
+            for (let row = leftBorder; row <= rightBorder; row++) {
+                let currentDistance = (row - leftBorder) * step + width
+                if (currentDistance >= PANEL_NEAREST_DISTANCE && currentDistance < PANEL_NEAREST_DISTANCE + step) {
+                    stringerPoints.push({'x': targetAnswer[i].x, 'row': row})
+                } else if (currentDistance >= totalLengthMM - PANEL_NEAREST_DISTANCE - step && currentDistance < totalLengthMM - PANEL_NEAREST_DISTANCE) {
+                    stringerPoints.push({'x': targetAnswer[i].x, 'row': row})
+                }
+                for (let point of points) {
+                    if (currentDistance >= point && currentDistance < point + step) {
+                        stringerPoints.push({'x': targetAnswer[i].x, 'row': row})
+                    }
+                }
             }
         } else {
-            for (let p = 0; p < pointsCount; p++) {
-                let pointRow = leftBorder + Math.round((p + 1) * (rightBorder - leftBorder) / (pointsCount + 1))
-                if (!(stringerPoints.length && pointRow === stringerPoints[stringerPoints.length - 1].row)) {
-                    stringerPoints.push({'x': target_answer[i].x, 'row': pointRow})
-                }
+            if (rightBorder - leftBorder !== 2) {
+                stringerPoints.push({'x': targetAnswer[i].x, 'row': leftBorder + 1})
+                stringerPoints.push({'x': targetAnswer[i].x, 'row': rightBorder - 1})
+            } else {
+                stringerPoints.push({'x': targetAnswer[i].x, 'row': leftBorder})
+                stringerPoints.push({'x': targetAnswer[i].x, 'row': rightBorder})
             }
         }
     }
@@ -638,9 +685,9 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
 
 
     let lines : any[] = []
-    for (let i = 0; i < target_answer.length; i++) {
-        let x = target_answer[i].x
-        let rows = target_answer[i].rows
+    for (let i = 0; i < targetAnswer.length; i++) {
+        let x = targetAnswer[i].x
+        let rows = targetAnswer[i].rows
         lines.push({
             first: realPointToWindow(rotatePointByAngle({
                 x: minX + x,
@@ -660,7 +707,13 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
             second : realPointToWindow(points[i - 1], P)
         })
     }
+
+    // делаем так, чтобы стрингеры плотно прилегали к контуру помещения, а их края
+    // не оставались висеть в воздухе
     lines = lines.map((line : WindowLineInterface) => {
+
+        // figureLines -- контур помещения
+        // appropriateFigureLines -- линии которые перпендикулярны текущей линии
         let appropriateFigureLines = figureLines.filter((figureLine) => {
             let firstVector : PointInterface = {
                 x : figureLine.second.x - figureLine.first.x,
@@ -670,14 +723,14 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
                 x : line.second.x - line.first.x,
                 y : line.second.y - line.first.y
             }
-            return Math.abs(firstVector.x * secondVector.x + firstVector.y * secondVector.y) < 0.01
+            return Math.abs(firstVector.x * secondVector.x + firstVector.y * secondVector.y) < 0.0001
         })
         let targetLine = line;
         appropriateFigureLines.every((figureLine) => {
             if (Math.abs(figureLine.first.x - figureLine.second.x) < 0.01) {
                 let distFromFirstPoint = Math.abs(figureLine.first.x - targetLine.first.x)
                 let distFromSecondPoint = Math.abs(figureLine.first.x - targetLine.second.x)
-                if (Math.min(distFromSecondPoint, distFromFirstPoint) < (width + margin) / ((1 / CELL_SIZE) * P) + margin) {
+                if (Math.min(distFromSecondPoint, distFromFirstPoint) < (width + margin) / ((1 / CELL_SIZE) * P)) {
                     if (distFromFirstPoint < distFromSecondPoint) {
                         targetLine = {
                             first : {
@@ -698,7 +751,7 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
                     return true
                 }
             }
-            if (Math.abs(figureLine.first.y - figureLine.second.y) < 0.01) {
+            if (Math.abs(figureLine.first.y - figureLine.second.y) < 0.0001) {
                 let distFromFirstPoint = Math.abs(figureLine.first.y - targetLine.first.y)
                 let distFromSecondPoint = Math.abs(figureLine.first.y - targetLine.second.y)
                 if (Math.min(distFromSecondPoint, distFromFirstPoint) < (width + margin) / ((1 / CELL_SIZE) * P)) {
@@ -761,14 +814,20 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
     for (const line of lines) {
         totalStringerLength += Math.sqrt(Math.pow(line.first.x - line.second.x, 2) + Math.pow(line.first.y - line.second.y, 2))
     }
-
-    // totalPanelLength *= P / CELL_SIZE
     totalStringerLength *= P / CELL_SIZE
+
+    let allStringersLengthsMM = []
+    lines.forEach((line) => {
+        let firstPoint = windowPointToReal(line.first, P)
+        let secondPoint = windowPointToReal(line.second, P)
+        let stringerLength = Math.min(distance(firstPoint, secondPoint), currentStringersLimit)
+        allStringersLengthsMM.push(stringerLength)
+    })
 
     return {
         totalPanelLength: totalPanelLength,
         totalStringerLength: totalStringerLength,
-        totalStringerCountActual: lines.length,
+        totalStringerCountActual: minBags(allStringersLengthsMM, currentStringersLimit),
         totalConnectorsCount: connectionPoints.length,
         svg: svg.svg()
     }
@@ -776,5 +835,5 @@ export function getPanelLocation(points: RealPointInterface[], material: number,
 }
 
 export function isPointsSame(point1 : PointInterface, point2 : PointInterface) : boolean {
-    return (Math.abs(point1.x - point2.x) < 0.01 && Math.abs(point1.y - point2.y) < 0.01)
+    return (Math.abs(point1.x - point2.x) < 0.0001 && Math.abs(point1.y - point2.y) < 0.0001)
 }

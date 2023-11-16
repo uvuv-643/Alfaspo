@@ -148,6 +148,7 @@ function Draw(props : DrawProps) {
             let oldPoints = [...props.points]
             oldPoints.push(newPoint)
             if (isValidPolygon(oldPoints)) {
+                setCreatedPolygon(true)
                 props.setPoints(oldPoints)
             }
         }

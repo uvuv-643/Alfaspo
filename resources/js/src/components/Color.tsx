@@ -107,22 +107,23 @@ function Color(props : ColorProps) {
                 {
                     id : 9,
                     isDark : false,
-                    image : "#0E0E10",
-                    title : "RAL 9005"
-                },
-                {
-                    id : 10,
-                    isDark : true,
-                    image : "#F4F8F4",
-                    title : "RAL 9003"
-                },
-                {
-                    id : 11,
-                    isDark : false,
                     light: true,
                     image : "/images/colors/1_11.png",
                     title : "Стандарт"
                 },
+                {
+                    id : 10,
+                    isDark : false,
+                    image : "#0E0E10",
+                    title : "RAL 9005"
+                },
+                {
+                    id : 11,
+                    isDark : true,
+                    image : "#F4F8F4",
+                    title : "RAL 9003"
+                },
+
             ])
         } else if (props.selectedMaterial?.id === 2) {
             setColorItems([

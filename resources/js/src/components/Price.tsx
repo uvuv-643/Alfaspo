@@ -137,12 +137,12 @@ function Price (props : PriceProps) {
             <div className="Price__Right">
                 <div className="Price__Reqs">
                     <h3>Для Обраного Приміщення Необхідно:</h3>
-                    <p>Панелі: { (selectedRoom.totalPanelLength / 1000).toFixed(1) } м.пог.</p>
-                    <p>Несучі профіля, { (stringerLength / 1000).toFixed(1) }м: { Math.ceil(selectedRoom.totalStringerLength / stringerLength) } шт.</p>
+                    <p>Панелі: { (Math.round(selectedRoom.totalPanelLength / 100) / 10).toFixed(1) } м.пог.</p>
+                    <p>Несучі профіля, { (stringerLength / 1000).toFixed(1) }м: { Math.ceil(selectedRoom.totalStringerCount) } шт.</p>
                     <p>З'єднувачі для панелей: { selectedRoom.totalConnectorsCount } шт.</p>
-                    <p>Шпильки різьбові М6: { selectedRoom.totalStringerCount } шт.</p>
-                    <p>Анкер різьбовий: { selectedRoom.totalStringerCount } шт.</p>
-                    <p>Гайка шестигранна М6: { 2 * selectedRoom.totalStringerCount } шт.</p>
+                    <p>Шпильки різьбові М6: { selectedRoom.totalConnectorsCount } шт.</p>
+                    <p>Анкер різьбовий: { selectedRoom.totalConnectorsCount } шт.</p>
+                    <p>Гайка шестигранна М6: { 2 * selectedRoom.totalConnectorsCount } шт.</p>
                 </div>
                 <hr/>
                 <div className="Price__Final">

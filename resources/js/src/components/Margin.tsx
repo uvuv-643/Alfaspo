@@ -18,7 +18,7 @@ function Margin(props : MarginProps) {
     const navigate = useNavigate()
 
     const handleBack = () => {
-        navigate('/dimension')
+        navigate('/dimension?height=1')
     }
 
     const handleNext = () => {

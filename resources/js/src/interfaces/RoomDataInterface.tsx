@@ -12,7 +12,10 @@ interface RoomDataInterface {
     secondColor : ColorElementInterface,
     heightLowering : number,
     totalPanelLength : number,
+
+    // must be unused
     totalStringerLength : number,
+
     totalConnectorsCount : number,
     totalStringerCount : number,
     svg : string
