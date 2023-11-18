@@ -74,25 +74,68 @@ function App() {
     const [totalWeight, setTotalWeight] = useState<number>(0)
     const [totalPrice, setTotalPrice] = useState<number>(0)
 
+    const [currentRoomIndex, setCurrentRoomIndex] = useState<number>(0)
+
+    // choose last room
+    useEffect(() => {
+        console.log(rooms)
+        setCurrentRoomIndex(rooms.length - 1)
+    }, [rooms]);
+
+    useEffect(() => {
+
+        let currentRoom = rooms[currentRoomIndex]
+        if (!currentRoom) return
+
+        setSelectedMaterial(currentRoom.selectedMaterial)
+        setSelectedWidth(currentRoom.selectedWidth)
+        setSelectedHeight(currentRoom.selectedHeight)
+        setSelectedMargin(currentRoom.selectedMargin)
+        setSelectedColor(currentRoom.selectedColor)
+        setSelectedSizeMode(currentRoom.selectedSizeMode)
+        setSelectedSizePlacement(currentRoom.selectedSizePlacement)
+        setSelectedPoints(currentRoom.selectedPoints)
+        setSelectedAngle(currentRoom.selectedAngle)
+        setFinishedBuilding(currentRoom.finishedBuilding)
+        setSelectedValues(currentRoom.selectedValues)
+        setSquare(currentRoom.square)
+        setHeightLowering(currentRoom.heightLowering)
+        setTotalPanelLength(currentRoom.totalPanelLength)
+        setTotalStringerCountActual(currentRoom.totalStringerCountActual)
+        setTotalConnectorsCount(currentRoom.totalConnectorsCount)
+        setSVG(currentRoom.svg)
+        setTotalWeight(currentRoom.totalWeight)
+        setTotalPrice(currentRoom.totalPrice)
+
+    }, [currentRoomIndex])
+
     const updateRoomData = () => {
         if (selectedMaterial && selectedWidth && selectedHeight && selectedMargin && selectedColor && selectedSecondColor
             && totalPanelLength && totalStringerLength && totalConnectorsCount && square && heightLowering) {
             let currentRoom : RoomDataInterface = {
-                material : selectedMaterial.id,
-                width : selectedWidth.value,
-                height : selectedHeight.value,
-                margin : selectedMargin.value,
-                square : square,
-                weight: totalWeight,
-                price: totalPrice,
-                color : selectedColor,
-                secondColor : selectedSecondColor,
-                heightLowering : heightLowering,
-                totalPanelLength : totalPanelLength,
-                totalStringerLength : totalStringerLength,
-                totalConnectorsCount : totalConnectorsCount,
-                totalStringerCount : totalStringerCountActual,
-                svg : svg
+                selectedMaterial: selectedMaterial,
+                selectedWidth: selectedWidth,
+                selectedHeight: selectedHeight,
+                selectedMargin: selectedMargin,
+                selectedColor: selectedColor,
+                selectedSecondColor: selectedSecondColor,
+                selectedSizeMode: selectedSizeMode,
+                selectedSize: selectedSize,
+                selectedSizePlacement: selectedSizePlacement,
+                selectedPoints: selectedPoints,
+                selectedAngle: selectedAngle,
+                finishedBuilding: finishedBuilding,
+                selectedValues: selectedValues,
+                square: square,
+                heightLowering: heightLowering,
+                totalPanelLength: totalPanelLength,
+                totalStringerCountActual: totalStringerCountActual,
+                totalConnectorsCount: totalConnectorsCount,
+                svg: svg,
+                totalWeight: totalWeight,
+                totalPrice: totalPrice,
+                totalStringerCount : 123
+
             }
             let copyOfCurrentRooms = JSON.parse(JSON.stringify(rooms))
             let shouldCreateRoom = rooms.length === 0 || attemptToCreateNewRoom
@@ -171,7 +214,7 @@ function App() {
 
     useEffect(() => {
         let totalPriceForAllRooms = rooms.reduce((prev, curr) => {
-            return prev + curr.price
+            return prev + curr.totalPrice
         }, 0)
         let selectedValuesClone = {...selectedValues}
         selectedValuesClone[PAGES.PRICE] = totalPriceForAllRooms.toFixed(2) + ' грн'
