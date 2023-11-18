@@ -76,17 +76,16 @@ function App() {
 
     const [currentRoomIndex, setCurrentRoomIndex] = useState<number>(0)
 
-    // choose last room
-    useEffect(() => {
-        console.log(rooms)
-        setCurrentRoomIndex(rooms.length - 1)
-    }, [rooms]);
+    const startedUpdating = useRef<boolean>(false)
 
     useEffect(() => {
 
+        startedUpdating.current = true;
+        setTimeout(() => {
+            startedUpdating.current = false
+        }, 500)
         let currentRoom = rooms[currentRoomIndex]
         if (!currentRoom) return
-
         setSelectedMaterial(currentRoom.selectedMaterial)
         setSelectedWidth(currentRoom.selectedWidth)
         setSelectedHeight(currentRoom.selectedHeight)
@@ -106,13 +105,19 @@ function App() {
         setSVG(currentRoom.svg)
         setTotalWeight(currentRoom.totalWeight)
         setTotalPrice(currentRoom.totalPrice)
+        setInputtedSides(currentRoom.inputtedSides)
+        setPreferSize(currentRoom.preferSize)
+
 
     }, [currentRoomIndex])
 
+
+    // update room data when current state was updated
     const updateRoomData = () => {
         if (selectedMaterial && selectedWidth && selectedHeight && selectedMargin && selectedColor && selectedSecondColor
             && totalPanelLength && totalStringerLength && totalConnectorsCount && square && heightLowering) {
             let currentRoom : RoomDataInterface = {
+                roomIndex: currentRoomIndex,
                 selectedMaterial: selectedMaterial,
                 selectedWidth: selectedWidth,
                 selectedHeight: selectedHeight,
@@ -134,15 +139,17 @@ function App() {
                 svg: svg,
                 totalWeight: totalWeight,
                 totalPrice: totalPrice,
-                totalStringerCount : 123
-
+                totalStringerCount : totalStringerCountActual,
+                inputtedSides : inputtedSides,
+                preferSize : preferSize
             }
+            console.log('updateRoomData', currentRoom.roomIndex, currentRoom)
             let copyOfCurrentRooms = JSON.parse(JSON.stringify(rooms))
             let shouldCreateRoom = rooms.length === 0 || attemptToCreateNewRoom
             if (shouldCreateRoom) {
                 copyOfCurrentRooms.push(currentRoom)
             } else {
-                copyOfCurrentRooms[copyOfCurrentRooms.length - 1] = currentRoom
+                copyOfCurrentRooms[currentRoom.roomIndex] = currentRoom
             }
             setAttemptToCreateNewRoom(false)
             setRooms(copyOfCurrentRooms)
@@ -158,6 +165,7 @@ function App() {
     }
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (selectedMaterial && selectedWidth && selectedHeight && selectedMargin && selectedColor) {
             let materialId = selectedMaterial?.id
             let stringerLength = 0
@@ -198,7 +206,6 @@ function App() {
                     let fastenersPrice = totalStringerCountActual * (
                         2 * response.data.price_screw + response.data.price_anchor + response.data.price_pin
                     )
-                    console.log(response.data)
                     setTotalPrice(panelPrice + stringerPrice + connectorPrice + fastenersPrice)
 
                 }
@@ -209,10 +216,12 @@ function App() {
     }, [selectedMaterial, selectedWidth, selectedHeight, selectedMargin, selectedColor, totalPanelLength, totalStringerLength]);
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         updateRoomData()
     }, [totalPrice, totalWeight])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         let totalPriceForAllRooms = rooms.reduce((prev, curr) => {
             return prev + curr.totalPrice
         }, 0)
@@ -375,6 +384,8 @@ function App() {
             rooms={rooms}
             addRoom={handleAddRoom}
             updateRoomData={updateRoomData}
+            handleSelectRoom={(index : number) => { console.log('selectIndex', index); setCurrentRoomIndex(index) }}
+            selectedRoomIndex={currentRoomIndex}
          />
     ) : <></>
 
@@ -392,23 +403,28 @@ function App() {
     const renderAttempts = useRef(0)
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('rooms', JSON.stringify(rooms))
     }, [rooms]);
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('selectedValues', JSON.stringify(selectedValues))
     }, [selectedValues])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (selectedMaterial) {
             let selectedValuesClone = {...selectedValues}
             selectedValuesClone[PAGES.MATERIAL] = selectedMaterial.title
             setSelectedValues(selectedValuesClone)
+            console.log("MATERIAL SELECTED", selectedMaterial.title)
             localStorage.setItem('material', JSON.stringify(selectedMaterial))
         }
     }, [selectedMaterial])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (selectedWidth && selectedHeight) {
             let selectedValuesClone = {...selectedValues}
             selectedValuesClone[PAGES.DIMENSIONS] = 'Рейка ' + selectedWidth.value + 'x' + selectedHeight.value + '(h)'
@@ -419,6 +435,7 @@ function App() {
     }, [selectedWidth, selectedHeight])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (selectedMargin) {
             let selectedValuesClone = {...selectedValues}
             selectedValuesClone[PAGES.MARGINS] = 'Відстань ' + selectedMargin.value + 'мм'
@@ -428,6 +445,7 @@ function App() {
     }, [selectedMargin])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (selectedColor && selectedSecondColor && selectedColor.title && selectedSecondColor.title) {
             let selectedValuesClone = {...selectedValues}
             selectedValuesClone[PAGES.COLORS] = `${selectedColor.title.replace('ево', '.')} / ${selectedSecondColor.title.replace('ево', '.')}`
@@ -438,6 +456,7 @@ function App() {
     }, [selectedColor, selectedSecondColor])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (square) {
             let selectedValuesClone = {...selectedValues}
             selectedValuesClone[PAGES.SIZE] = square?.toFixed(1) + 'м²'
@@ -446,9 +465,8 @@ function App() {
         }
     }, [square]);
 
-
-
     useEffect(() => {
+        if (startedUpdating.current) return;
         if (selectedColor && selectedSecondColor) {
             localStorage.setItem('size-mode', JSON.stringify(selectedSizeMode))
             localStorage.setItem('size', JSON.stringify(selectedSize))
@@ -457,18 +475,22 @@ function App() {
     }, [selectedSizeMode, selectedSize, selectedSizePlacement])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('selectedAngle', JSON.stringify(selectedAngle))
     }, [selectedAngle])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('inputtedSides', JSON.stringify(inputtedSides))
     }, [inputtedSides])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('finishedBuilding', JSON.stringify(finishedBuilding))
     }, [finishedBuilding])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('total-panel-length', JSON.stringify(totalPanelLength))
         localStorage.setItem('total-stringer-length', JSON.stringify(totalStringerLength))
         localStorage.setItem('total-stringer-count', JSON.stringify(totalStringerCountActual))
@@ -477,6 +499,7 @@ function App() {
     }, [totalPanelLength, totalStringerLength, totalConnectorsCount, totalStringerCountActual, svg])
 
     useEffect(() => {
+        if (startedUpdating.current) return;
         localStorage.setItem('height-lowering', JSON.stringify(heightLowering))
     }, [heightLowering]);
 

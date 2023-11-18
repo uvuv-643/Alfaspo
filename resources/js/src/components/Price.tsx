@@ -1,21 +1,23 @@
 import * as React from 'react'
 import {useNavigate} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {ACOUSTIC_MAX_STRINGER, ALUMINUM_MAX_STRINGER, STEEL_MAX_STRINGER} from "./Draw/utils/Utils";
 import RoomDataInterface from "../interfaces/RoomDataInterface";
 
 interface PriceProps {
     addRoom : () => void,
     rooms : RoomDataInterface[],
-    updateRoomData : () => void
+    updateRoomData : () => void,
+    handleSelectRoom : (index : number) => void,
+    selectedRoomIndex : number
 }
 
 
 function Price (props : PriceProps) {
 
     const [stringerLength, setStringerLength] = useState<number>(0)
-    const [selectedRoomIndex, setSelectedRoomIndex] = useState<number>(0)
     const [selectedRoom, setSelectedRoom] = useState<RoomDataInterface>()
+    const attemptToAddRoom = useRef<boolean>(false)
 
     const navigate = useNavigate()
 
@@ -28,7 +30,8 @@ function Price (props : PriceProps) {
     }
 
     const addRoom = () => {
-        props.addRoom()
+        attemptToAddRoom.current = true;
+        props.handleSelectRoom(props.rooms.length)
     }
 
     const handleChangeColors = () => {
@@ -36,19 +39,22 @@ function Price (props : PriceProps) {
     }
 
     useEffect(() => {
-        setSelectedRoom(props.rooms[selectedRoomIndex])
-    }, [selectedRoomIndex, props.rooms]);
+        setSelectedRoom(props.rooms[props.selectedRoomIndex])
+    }, [props.rooms, props.selectedRoomIndex]);
 
     useEffect(() => {
-        setSelectedRoomIndex(props.rooms.length - 1)
-    }, [props.rooms]);
+        if (attemptToAddRoom.current) {
+            props.addRoom()
+            attemptToAddRoom.current = false;
+        }
+    }, [props.selectedRoomIndex]);
 
     useEffect(() => {
-        if (selectedRoom?.material === 1) {
+        if (selectedRoom?.selectedMaterial?.id === 1) {
             setStringerLength(STEEL_MAX_STRINGER)
-        } else if (selectedRoom?.material === 2) {
+        } else if (selectedRoom?.selectedMaterial?.id === 2) {
             setStringerLength(ALUMINUM_MAX_STRINGER)
-        } else if (selectedRoom?.material === 3) {
+        } else if (selectedRoom?.selectedMaterial?.id === 3) {
             setStringerLength(ACOUSTIC_MAX_STRINGER)
         }
     }, [selectedRoom])
@@ -68,8 +74,8 @@ function Price (props : PriceProps) {
                         <div className="Price__Rooms">
                             {[...Array(Math.min(12, props.rooms.length))].map((_, index) => (
                                 <div
-                                    className={"Price__Rooms__Item " + (selectedRoomIndex === index ? '_active' : '')}
-                                    onClick={() => setSelectedRoomIndex(index)}
+                                    className={"Price__Rooms__Item " + (props.selectedRoomIndex === index ? '_active' : '')}
+                                    onClick={() => props.handleSelectRoom(index)}
                                 >
                                     {
                                         props.rooms.length > 4 ?
@@ -87,17 +93,17 @@ function Price (props : PriceProps) {
                 <div className="Price__Chosen">
                     <h3>Ви Обрали:</h3>
                     <p>Кубоподібна стеля з {
-                        selectedRoom.material === 1 && 'оцинкованої сталі'
+                        selectedRoom.selectedMaterial?.id === 1 && 'оцинкованої сталі'
                     } {
-                        selectedRoom.material === 2 && 'алюмінію'
+                        selectedRoom.selectedMaterial?.id === 2 && 'алюмінію'
                     } {
-                        selectedRoom.material === 3 && 'акустичній повсті'
+                        selectedRoom.selectedMaterial?.id === 3 && 'акустичній повсті'
                     }</p>
-                    <p>Ширина панелей: { selectedRoom.width }мм</p>
-                    <p>Висота панелей: { selectedRoom.height }мм</p>
-                    <p>Відстань між панелями: { selectedRoom.margin }мм</p>
+                    <p>Ширина панелей: { selectedRoom.selectedWidth?.value }мм</p>
+                    <p>Висота панелей: { selectedRoom.selectedHeight?.value  }мм</p>
+                    <p>Відстань між панелями: { selectedRoom.selectedMargin?.value }мм</p>
                     <p>Площа приміщення: { selectedRoom.square?.toFixed(1) }м²</p>
-                    <p>Вага конструкції: { selectedRoom.weight?.toFixed(2) }кг ({ (selectedRoom.weight / selectedRoom.square)?.toFixed(2) }кг/м²)</p>
+                    <p>Вага конструкції: { selectedRoom.totalWeight?.toFixed(2) }кг ({ (selectedRoom.totalWeight / selectedRoom.square)?.toFixed(2) }кг/м²)</p>
                     <p>Гайка шестигранна М6: { 2 * selectedRoom.totalConnectorsCount } шт.</p>
                     <p>Висота опускання конструкції: { selectedRoom.heightLowering }мм</p>
                 </div>
@@ -109,12 +115,12 @@ function Price (props : PriceProps) {
                             <div className={"Price__Colors__Color " + (props.rooms.length > 1 ? '_active' : '') }>
                                 <div className="Price__Colors__Color__Bg">
                                     {
-                                        selectedRoom.color.image.includes('#') ?
-                                        <span style={{background: selectedRoom.color.image}}></span> :
-                                        <img src={selectedRoom.color.image} alt=""/>
+                                        selectedRoom.selectedColor.image.includes('#') ?
+                                        <span style={{background: selectedRoom.selectedColor.image}}></span> :
+                                        <img src={selectedRoom.selectedColor.image} alt=""/>
                                     }
                                 </div>
-                                <div className="Price__Colors__Color__Title" style={{ color: selectedRoom.color.light ? 'white' : selectedRoom.color.isDark ? 'black' : 'white'}}>{ selectedRoom.color.title }</div>
+                                <div className="Price__Colors__Color__Title" style={{ color: selectedRoom.selectedColor.light ? 'white' : selectedRoom.selectedColor.isDark ? 'black' : 'white'}}>{ selectedRoom.selectedColor.title }</div>
                             </div>
                         </div>
                         <div className="Price__Colors__Item">
@@ -122,12 +128,12 @@ function Price (props : PriceProps) {
                             <div className={"Price__Colors__Color " + (props.rooms.length > 1 ? '_active' : '') }>
                                 <div className="Price__Colors__Color__Bg">
                                     {
-                                        selectedRoom.secondColor.image.includes('#') ?
-                                        <span style={{background: selectedRoom.secondColor.image}}></span> :
-                                        <img src={selectedRoom.secondColor.image} alt=""/>
+                                        selectedRoom.selectedSecondColor.image.includes('#') ?
+                                        <span style={{background: selectedRoom.selectedSecondColor.image}}></span> :
+                                        <img src={selectedRoom.selectedSecondColor.image} alt=""/>
                                     }
                                 </div>
-                                <div className="Price__Colors__Color__Title" style={{ color: selectedRoom.secondColor.light ? 'white' : selectedRoom.secondColor.isDark ? 'black' : 'white' }}>{ selectedRoom.secondColor.title }</div>
+                                <div className="Price__Colors__Color__Title" style={{ color: selectedRoom.selectedSecondColor.light ? 'white' : selectedRoom.selectedSecondColor.isDark ? 'black' : 'white' }}>{ selectedRoom.selectedSecondColor.title }</div>
                             </div>
                         </div>
                     </div>
@@ -146,8 +152,8 @@ function Price (props : PriceProps) {
                 </div>
                 <hr/>
                 <div className="Price__Final">
-                    <h2>{ selectedRoom.price?.toFixed(2) } грн</h2>
-                    <p>або { (selectedRoom.price / selectedRoom.square)?.toFixed(2)  } грн / м²</p>
+                    <h2>{ selectedRoom.totalPrice?.toFixed(2) } грн</h2>
+                    <p>або { (selectedRoom.totalPrice / selectedRoom.square)?.toFixed(2)  } грн / м²</p>
                 </div>
                 <div className="Price__Notation">
                     Попередня вартість матеріалів з урахуванням усіх комплектуючих з ПДВ

@@ -4,6 +4,7 @@ import {DimensionsElementInterface} from "./DimensionsElementInterface";
 import {MarginElementInterface} from "./MarginElementInterface";
 import {RealPointInterface} from "../components/Draw/utils/Utils";
 import {SidebarSelectedValues} from "./SidebarSelectedValues";
+import {useState} from "react";
 
 interface RoomDataInterface {
 
@@ -20,6 +21,10 @@ interface RoomDataInterface {
     selectedAngle : number | null,
     finishedBuilding : boolean,
     selectedValues : SidebarSelectedValues,
+
+    inputtedSides : string[],
+    preferSize : number,
+
     square : number | undefined,
     heightLowering : number,
     totalPanelLength : number,
@@ -29,6 +34,8 @@ interface RoomDataInterface {
     svg : string,
     totalWeight : number,
     totalPrice : number,
+
+    roomIndex : number,
 
     totalStringerCount : number,
 

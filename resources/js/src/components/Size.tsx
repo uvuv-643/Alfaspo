@@ -41,7 +41,7 @@ function Size(props : SizeProps) {
     const [focusedSideSquare, setFocusedSideSquare] = useState<SQUARE_SIDES | null>(null)
     const [focusedSidePolygon, setFocusedSidePolygon] = useState<POLYGON_SIDES | null>(null)
 
-    const [selectedSize, setSelectedSize] = useState<number>(JSON.parse(localStorage.getItem('size') || '0'))
+    const [selectedSize, setSelectedSize] = useState<number>(JSON.parse(localStorage.getItem('size') || '1'))
     const [selectedSizePlacement, setSelectedSizePlacement] = useState<number>(JSON.parse(localStorage.getItem('size-placement') || '1'))
 
     const navigate = useNavigate()
@@ -132,7 +132,7 @@ function Size(props : SizeProps) {
             props.setInputtedSides(['', '', '', '', '', ''])
         }
     }, [props.selectedSize])
-    
+
     useEffect(() => {
         props.handleSelectSize(selectedSize)
     }, [selectedSize])

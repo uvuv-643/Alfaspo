@@ -224,7 +224,7 @@ function Color(props : ColorProps) {
                     id : 27,
                     isDark : false,
                     image : "#0E0E10",
-                    title : "RAL 9003"
+                    title : "RAL 9005"
                 },
             ])
         } else if (props.selectedMaterial?.id === 3) {

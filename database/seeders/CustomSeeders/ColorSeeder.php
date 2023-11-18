@@ -12,6 +12,7 @@ class ColorSeeder extends Seeder
     {
         return [
             ['title' => 'RAL 9003'],
+            ['title' => 'Стандарт'],
             ['title' => 'RAL 8017'],
             ['title' => 'RAL 9006'],
             ['title' => 'Дерево 1'],
@@ -48,6 +49,7 @@ class ColorSeeder extends Seeder
             ['title' => 'Коричневий 7577'],
             ['title' => 'Т. Коричневий 7578'],
             ['title' => 'Умбра 7579'],
+            ['title' => 'RAL 9005'],
         ];
     }
 
