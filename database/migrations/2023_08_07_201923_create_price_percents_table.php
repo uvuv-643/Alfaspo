@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('price_percents', function (Blueprint $table) {
             $table->foreignId('material_id')->primary()->constrained()->cascadeOnDelete();
             $table->double('percent')->default(100);
+            $table->double('percent_stringers')->default(100);
+            $table->double('percent_connectors')->default(100);
         });
     }
 

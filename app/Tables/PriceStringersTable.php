@@ -26,10 +26,13 @@ class PriceStringersTable extends AbstractTableConfiguration
     protected function columns(): array
     {
         return [
-            Column::make('color_id')->title('Колiр')->format(function ($item) {
+            Column::make('stringer_color_id')->title('Колiр')->format(function ($item) {
                 return $item->color->title;
             })->sortable(),
             Column::make('price_stringer')->title('Вартiсть стр.')->sortable(),
+            Column::make('price_percent')->title('Вартiсть стр. (з нацiнкою)')->format(function ($item) {
+                return $item->getPrice();
+            })->sortable(),
             Column::make('weight_stringer')->title('Вага стр.')->sortable(),
             Column::make('created_at')->title('Створено')->format(new DateFormatter('d.m.Y H:i:s'))->sortable(),
         ];

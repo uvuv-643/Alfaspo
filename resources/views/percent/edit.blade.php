@@ -39,6 +39,26 @@
                                 value="{{ old('percent', $percent->percent) }}"
                             />
 
+                            <x-input-label for="percent_stringer" value="{{ __('Вiдсоток стрингер') }}" />
+                            <x-text-input
+                                    id="percent_stringers"
+                                    name="percent_stringers"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    placeholder="{{ __('Вiдсоток стрингер') }}"
+                                    value="{{ old('percent_stringers', $percent->percent_stringers) }}"
+                            />
+
+                            <x-input-label for="percent_stringer" value="{{ __('Вiдсоток з\'єднувач') }}" />
+                            <x-text-input
+                                    id="percent_connectors"
+                                    name="percent_connectors"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                    placeholder="{{ __('Вiдсоток з\'єднувач') }}"
+                                    value="{{ old('percent_connectors', $percent->percent_connectors) }}"
+                            />
+
                             <div class="mt-4 mb-5">
                                 <button class="btn btn-success">Редагувати</button>
                             </div>

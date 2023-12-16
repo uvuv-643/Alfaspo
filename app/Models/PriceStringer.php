@@ -13,7 +13,7 @@ class PriceStringer extends Model
     protected $guarded = [];
 
     protected $fillable = [
-        'color_id', 'price_stringer', 'weight_stringer',
+        'stringer_color_id', 'price_stringer', 'weight_stringer', 'material_id'
     ];
 
     protected $attributes = [
@@ -23,11 +23,17 @@ class PriceStringer extends Model
 
     public function color() : BelongsTo
     {
-        return $this->belongsTo(Color::class);
+        return $this->belongsTo(StringerColor::class, 'stringer_color_id');
     }
 
     public function material() : BelongsTo
     {
         return $this->belongsTo(Material::class);
     }
+
+    public function getPrice() : float
+    {
+        return $this->price_stringer * PricePercent::where('material_id', $this->material()->first()->id)->first()->percent_stringers / 100;
+    }
+
 }

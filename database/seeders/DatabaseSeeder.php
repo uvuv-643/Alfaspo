@@ -2,12 +2,11 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
-use Database\Seeders\CustomSeeders\AdminSeeder;
 use Database\Seeders\CustomSeeders\ColorSeeder;
 use Database\Seeders\CustomSeeders\MaterialSeeder;
 use Database\Seeders\CustomSeeders\PricePercentSeeder;
+use Database\Seeders\CustomSeeders\StringerColorSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -29,6 +28,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MaterialSeeder::class,
             ColorSeeder::class,
+            StringerColorSeeder::class,
             PricePercentSeeder::class,
         ]);
     }

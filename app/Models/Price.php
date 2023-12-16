@@ -32,4 +32,9 @@ class Price extends Model
         return $this->belongsTo(Material::class);
     }
 
+    public function getPrice() : float
+    {
+        return $this->price * PricePercent::where('material_id', $this->material()->first()->id)->first()->percent / 100;
+    }
+
 }

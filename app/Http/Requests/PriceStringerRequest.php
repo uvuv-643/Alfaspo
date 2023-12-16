@@ -24,7 +24,7 @@ class PriceStringerRequest extends FormRequest
     {
         return [
             'material_id' => ['required', Rule::exists('materials', 'id')],
-            'color_id' => ['required', Rule::exists('colors', 'id')]
+            'stringer_color_id' => ['required', Rule::exists('stringer_colors', 'id')]
         ];
     }
 }

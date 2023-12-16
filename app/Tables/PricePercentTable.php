@@ -25,7 +25,9 @@ class PricePercentTable extends AbstractTableConfiguration
             Column::make('material_id')->title('Матерiал')->format(function ($item) {
                 return $item->material->title;
             })->sortable(),
-            Column::make('percent')->title('Відсоток націнки')->sortable(),
+            Column::make('percent')->title('Відсоток націнки панель')->sortable(),
+            Column::make('percent_stringers')->title('Відсоток націнки стрiнгер')->sortable(),
+            Column::make('percent_connectors')->title('Відсоток націнки з\'єднувач')->sortable(),
         ];
     }
 

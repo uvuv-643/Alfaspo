@@ -36,6 +36,9 @@ class PriceTable extends AbstractTableConfiguration
                 return $item->color->title;
             })->sortable(),
             Column::make('price')->title('Вартiсть панель')->sortable(),
+            Column::make('price_percent')->title('Вартiсть панель (з нацiнкою)')->format(function ($item) {
+                return $item->getPrice();
+            })->sortable(),
             Column::make('weight')->title('Вага панель (або за м^2 для ак. повстi)')->sortable(),
             Column::make('created_at')->title('Створено')->format(new DateFormatter('d.m.Y H:i:s'))->sortable(),
         ];

@@ -22,6 +22,19 @@
                         </div>
                     @endif
 
+                        <div class="alert alert-info mb-3">
+                            <ul class="mb-0">
+                                <ul>
+                                    <li>Сталь панель - 6000мм</li>
+                                    <li>Сталь стрiнгер - 3900мм</li>
+                                    <li>Алюмiнiй панель - 4000мм</li>
+                                    <li>Алюмiнiй стрiнгер - 3600мм</li>
+                                    <li>Акустична панель - 5000мм</li>
+                                    <li>Акустична стрiнгер - 5000мм (4000мм висота=105мм)</li>
+                                </ul>
+                            </ul>
+                        </div>
+
                     <form action="{{ route('price.panels.update', $price) }}" method="post">
                         @csrf
                         @method('put')

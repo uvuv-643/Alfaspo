@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('price_stringers', function (Blueprint $table) {
+        Schema::create('stringer_colors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('stringer_color_id')->constrained()->cascadeOnDelete();
+            $table->string('title');
             $table->foreignId('material_id')->constrained()->cascadeOnDelete();
-            $table->double('price_stringer')->default(0);
-            $table->double('weight_stringer')->default(0);
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('price_stringers');
+        Schema::dropIfExists('stringer_colors');
     }
 };

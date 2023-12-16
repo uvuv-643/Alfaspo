@@ -34,4 +34,10 @@ class PriceConnector extends Model
     {
         return $this->belongsTo(Material::class);
     }
+
+    public function getPrice() : float
+    {
+        return $this->price_connectors * PricePercent::where('material_id', $this->material()->first()->id)->first()->percent / 100;
+    }
+
 }

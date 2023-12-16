@@ -13,7 +13,7 @@ class PricePercent extends Model
     protected $primaryKey = 'material_id';
     public $timestamps = false;
     protected $guarded = [];
-    protected $fillable = ['material_id', 'percent'];
+    protected $fillable = ['material_id', 'percent', 'percent_stringers', 'percent_connectors'];
 
     public function material() : BelongsTo
     {
